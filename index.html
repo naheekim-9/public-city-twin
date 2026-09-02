@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CITY TWIN">
+<title>PUBLIC CITY TWIN</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+background:#07101c;color:white}
+
+#app{width:100%;height:100%;position:relative}
+
+#ui{
+position:absolute;z-index:10;left:15px;top:15px;
+width:310px;max-height:calc(100% - 30px);overflow:auto;
+background:rgba(8,16,28,.88);backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,.12);
+border-radius:18px;padding:18px;
+box-shadow:0 15px 50px rgba(0,0,0,.35)
+}
+
+h1{font-size:20px;margin:0 0 4px}
+.sub{font-size:11px;color:#91a1b5;margin-bottom:15px}
+
+.section{margin-top:15px}
+.section-title{font-size:12px;color:#8fa4bd;margin-bottom:7px}
+
+button{
+border:0;border-radius:10px;padding:10px 11px;
+background:#17283d;color:white;font-weight:600;
+margin:3px;cursor:pointer
+}
+button:active{transform:scale(.97)}
+button.active{background:#367cff}
+
+.slider{margin:9px 0}
+.slider label{display:flex;justify-content:space-between;font-size:12px}
+input[type=range]{width:100%}
+
+.metrics{
+display:grid;grid-template-columns:1fr 1fr;
+gap:7px;margin-top:10px
+}
+.metric{
+background:rgba(255,255,255,.06);
+border-radius:10px;padding:9px
+}
+.metric small{display:block;color:#8fa0b5;font-size:10px}
+.metric b{font-size:17px}
+
+#year{
+font-size:13px;color:#7eb3ff;margin-top:10px
+}
+
+#hint{
+position:absolute;bottom:18px;left:50%;
+transform:translateX(-50%);
+z-index:5;background:rgba(5,12,22,.7);
+padding:9px 14px;border-radius:20px;
+font-size:11px;color:#cbd6e4;
+pointer-events:none
+}
+
+#loading{
+position:absolute;inset:0;z-index:30;
+display:flex;align-items:center;justify-content:center;
+background:#07101c;font-size:20px
+}
+
+@media(max-width:700px){
+#ui{width:270px;left:8px;top:8px;padding:13px}
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+<div id="loading">CITY TWIN 불러오는 중...</div>
+
+<div id="ui">
+<h1>🏙 PUBLIC CITY TWIN</h1>
+<div class="sub">2차 공공기관 이전 · 도시 시뮬레이션</div>
+
+<div class="section">
+<div class="section-title">도시 모델</div>
+<button onclick="preset('optimal')">통합 최적형</button>
+<button onclick="preset('industry')">산업 클러스터</button>
+<button onclick="preset('living')">정주환경 중심</button>
+<button onclick="preset('talent')">지역인재 중심</button>
+</div>
+
+<div class="section">
+<div class="section-title">공간 구조</div>
+<button onclick="layout('compact')">집약형</button>
+<button onclick="layout('linear')">선형형</button>
+<button onclick="layout('multi')">다핵형</button>
+</div>
+
+<div class="section">
+<div class="section-title">정책 변수</div>
+
+<div class="slider">
+<label>정주환경 <span id="v1">70</span></label>
+<input id="s1" type="range" min="0" max="100" value="70">
+</div>
+
+<div class="slider">
+<label>산업 클러스터 <span id="v2">70</span></label>
+<input id="s2" type="range" min="0" max="100" value="70">
+</div>
+
+<div class="slider">
+<label>지역인재 <span id="v3">60</span></label>
+<input id="s3" type="range" min="0" max="100" value="60">
+</div>
+
+<div class="slider">
+<label>교통망 <span id="v4">70</span></label>
+<input id="s4" type="range" min="0" max="100" value="70">
+</div>
+
+<div class="slider">
+<label>산학연 연계 <span id="v5">65</span></label>
+<input id="s5" type="range" min="0" max="100" value="65">
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">시간 이동</div>
+<button onclick="advance(1)">+1년</button>
+<button onclick="advance(5)">+5년</button>
+<button onclick="advance(20)" class="active">20년 시뮬레이션</button>
+<div id="year">현재 시점 : 2026년</div>
+</div>
+
+<div class="metrics">
+<div class="metric"><small>인구</small><b id="pop">40,000</b></div>
+<div class="metric"><small>기업</small><b id="firms">120</b></div>
+<div class="metric"><small>일자리</small><b id="jobs">8,000</b></div>
+<div class="metric"><small>상권 활성도</small><b id="commerce">55%</b></div>
+</div>
+
+</div>
+
+<div id="hint">👆 드래그: 도시 회전 · 두 손가락/휠: 확대·축소</div>
+</div>
+
+<script type="module">
+
+import * as THREE from
+"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+
+let scene,camera,renderer;
+let city=new THREE.Group();
+let buildings=[];
+let roads=[];
+let trees=[];
+let currentYear=2026;
+
+let values={
+settlement:70,
+industry:70,
+talent:60,
+transport:70,
+research:65
+};
+
+init();
+
+function init(){
+
+scene=new THREE.Scene();
+scene.background=new THREE.Color(0x08121f);
+
+camera=new THREE.PerspectiveCamera(
+45,
+innerWidth/innerHeight,
+0.1,
+1000
+);
+
+camera.position.set(55,55,65);
+camera.lookAt(0,0,0);
+
+renderer=new THREE.WebGLRenderer({
+antialias:true,
+powerPreference:"high-performance"
+});
+
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+
+document.getElementById("app").appendChild(renderer.domElement);
+
+const ambient=new THREE.HemisphereLight(
+0xbfd9ff,0x18222f,2.2
+);
+scene.add(ambient);
+
+const sun=new THREE.DirectionalLight(0xffffff,3);
+sun.position.set(30,70,30);
+sun.castShadow=true;
+scene.add(sun);
+
+createGround();
+createCity("compact");
+
+setupTouch();
+
+animate();
+
+setTimeout(()=>{
+document.getElementById("loading").style.display="none";
+},500);
+
+}
+
+function createGround(){
+
+const geo=new THREE.PlaneGeometry(180,180);
+const mat=new THREE.MeshStandardMaterial({
+color:0x172331,
+roughness:.9
+});
+
+const ground=new THREE.Mesh(geo,mat);
+ground.rotation.x=-Math.PI/2;
+ground.receiveShadow=true;
+scene.add(ground);
+
+}
+
+function building(x,z,w,d,h,type="normal"){
+
+let color;
+
+if(type==="public") color=0x4c8dff;
+else if(type==="university") color=0x7a62d8;
+else if(type==="research") color=0x35a99b;
+else if(type==="housing") color=0x64758b;
+else color=0x8a9bad;
+
+const geo=new THREE.BoxGeometry(w,h,d);
+const mat=new THREE.MeshStandardMaterial({
+color,
+roughness:.65
+});
+
+const mesh=new THREE.Mesh(geo,mat);
+mesh.position.set(x,h/2,z);
+mesh.castShadow=true;
+mesh.receiveShadow=true;
+
+city.add(mesh);
+buildings.push(mesh);
+
+}
+
+function road(x,z,w,d){
+
+const geo=new THREE.BoxGeometry(w,.12,d);
+
+const mat=new THREE.MeshStandardMaterial({
+color:0x27384b,
+roughness:1
+});
+
+const r=new THREE.Mesh(geo,mat);
+r.position.set(x,.06,z);
+city.add(r);
+roads.push(r);
+
+}
+
+function tree(x,z){
+
+const trunk=new THREE.Mesh(
+new THREE.CylinderGeometry(.18,.22,1.2,8),
+new THREE.MeshStandardMaterial({color:0x6e5138})
+);
+
+trunk.position.set(x,.6,z);
+
+const top=new THREE.Mesh(
+new THREE.SphereGeometry(.75,10,8),
+new THREE.MeshStandardMaterial({color:0x356b4c})
+);
+
+top.position.set(x,1.5,z);
+
+city.add(trunk,top);
+trees.push(trunk,top);
+
+}
+
+function createCity(type){
+
+buildings.forEach(x=>city.remove(x));
+roads.forEach(x=>city.remove(x));
+trees.forEach(x=>city.remove(x));
+
+buildings=[];
+roads=[];
+trees=[];
+
+if(type==="linear"){
+
+for(let i=-7;i<=7;i++){
+
+road(0,i*7,110,.7);
+
+building(-12,i*7-1,5,5,8+Math.random()*12);
+building(12,i*7+1,5,5,10+Math.random()*16);
+
+}
+
+building(0,0,12,10,24,"public");
+building(0,14,10,9,18,"university");
+building(0,-15,10,9,20,"research");
+
+}
+
+else if(type==="multi"){
+
+const centers=[
+[-28,-25], [28,-25],
+[-28,25], [28,25], [0,0]
+];
+
+centers.forEach((c,index)=>{
+
+road(c[0],c[1],24,2);
+road(c[0],c[1],2,24);
+
+building(
+c[0],c[1],
+index===4?13:9,
+index===4?13:9,
+index===4?28:15,
+index===4?"public":"normal"
+);
+
+for(let i=0;i<4;i++){
+building(
+c[0]+(Math.random()-.5)*16,
+c[1]+(Math.random()-.5)*16,
+4,4,6+Math.random()*15,
+"housing"
+);
+}
+
+});
+
+}
+
+else{
+
+road(0,0,150,2);
+road(0,0,2,150);
+
+building(0,0,13,11,30,"public");
+
+for(let i=0;i<22;i++){
+
+let x=(Math.random()-.5)*65;
+let z=(Math.random()-.5)*65;
+
+if(Math.abs(x)<10 && Math.abs(z)<10) continue;
+
+building(
+x,z,
+4+Math.random()*3,
+4+Math.random()*3,
+7+Math.random()*22,
+i%5===0?"housing":"normal"
+);
+
+}
+
+building(-23,-20,11,9,18,"university");
+building(24,-18,11,9,21,"research");
+
+}
+
+for(let i=0;i<35;i++){
+
+tree(
+(Math.random()-.5)*120,
+(Math.random()-.5)*120
+);
+
+}
+
+}
+
+function layout(type){
+
+createCity(type);
+
+}
+
+function preset(type){
+
+if(type==="optimal"){
+setSliders(85,85,80,85,85);
+}
+
+if(type==="industry"){
+setSliders(65,100,65,80,95);
+}
+
+if(type==="living"){
+setSliders(100,60,55,75,55);
+}
+
+if(type==="talent"){
+setSliders(75,70,100,75,90);
+}
+
+}
+
+function setSliders(a,b,c,d,e){
+
+document.getElementById("s1").value=a;
+document.getElementById("s2").value=b;
+document.getElementById("s3").value=c;
+document.getElementById("s4").value=d;
+document.getElementById("s5").value=e;
+
+updateValues();
+
+}
+
+function updateValues(){
+
+values.settlement=+s1.value;
+values.industry=+s2.value;
+values.talent=+s3.value;
+values.transport=+s4.value;
+values.research=+s5.value;
+
+v1.textContent=s1.value;
+v2.textContent=s2.value;
+v3.textContent=s3.value;
+v4.textContent=s4.value;
+v5.textContent=s5.value;
+
+}
+
+["s1","s2","s3","s4","s5"].forEach(id=>{
+document.getElementById(id).addEventListener("input",updateValues);
+});
+
+function advance(years){
+
+currentYear+=years;
+
+let quality=(
+values.settlement+
+values.industry+
+values.talent+
+values.transport+
+values.research
+)/5;
+
+let pop=Math.round(
+40000*
+(1+(quality-50)/1000*years)
+);
+
+let firms=Math.round(
+120*
+(1+(values.industry+values.research-100)/300*years)
+);
+
+let jobs=Math.round(
+8000*
+(1+(values.industry+values.research)/1000*years)
+);
+
+let commerce=Math.min(
+99,
+Math.round(
+55+(values.settlement+
+values.transport+
+values.industry-150)/5+
+years*.5
+)
+);
+
+document.getElementById("pop").textContent=
+pop.toLocaleString();
+
+document.getElementById("firms").textContent=
+firms.toLocaleString();
+
+document.getElementById("jobs").textContent=
+jobs.toLocaleString();
+
+document.getElementById("commerce").textContent=
+commerce+"%";
+
+document.getElementById("year").textContent=
+"현재 시점 : "+currentYear+"년";
+
+animateGrowth();
+
+}
+
+function animateGrowth(){
+
+buildings.forEach((b,i)=>{
+
+const target=b.scale.y;
+
+b.scale.y=.15;
+
+let start=performance.now();
+
+function grow(t){
+
+let p=Math.min((t-start)/700,1);
+b.scale.y=.15+(target-.15)*p;
+
+if(p<1)requestAnimationFrame(grow);
+
+}
+
+requestAnimationFrame(grow);
+
+});
+
+}
+
+let dragging=false;
+let lastX=0;
+let lastY=0;
+
+function setupTouch(){
+
+renderer.domElement.addEventListener("pointerdown",e=>{
+dragging=true;
+lastX=e.clientX;
+lastY=e.clientY;
+});
+
+renderer.domElement.addEventListener("pointerup",()=>{
+dragging=false;
+});
+
+renderer.domElement.addEventListener("pointermove",e=>{
+
+if(!dragging)return;
+
+let dx=e.clientX-lastX;
+let dy=e.clientY-lastY;
+
+city.rotation.y+=dx*.006;
+camera.position.y+=dy*.04;
+
+camera.position.y=
+Math.max(25,Math.min(100,camera.position.y));
+
+lastX=e.clientX;
+lastY=e.clientY;
+
+});
+
+renderer.domElement.addEventListener("wheel",e=>{
+
+camera.position.multiplyScalar(
+e.deltaY>0?1.08:.92
+);
+
+camera.position.y=
+Math.max(25,Math.min(120,camera.position.y));
+
+});
+
+}
+
+function animate(){
+
+requestAnimationFrame(animate);
+
+renderer.render(scene,camera);
+
+}
+
+window.addEventListener("resize",()=>{
+
+camera.aspect=innerWidth/innerHeight;
+camera.updateProjectionMatrix();
+
+renderer.setSize(innerWidth,innerHeight);
+
+});
+
+</script>
+</body>
+</html>
