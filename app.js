@@ -1,91 +1,98 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
-import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
-const lerp=(a,b,t)=>a+(b-a)*t;
-const fmt=n=>Math.round(n).toLocaleString('ko-KR');
-const rand=(a,b)=>a+Math.random()*(b-a);
-
-const state={year:2026,layout:'poly',preset:'optimal',tool:null,simulating:false,
- settlement:82,industry:84,talent:78,transport:86,research:88,
- population:42000,firms:310,jobs:18500,vacancy:12,commerce:68,network:81,development:78,
- history:[],selected:null};
-const presets={
- optimal:{settlement:82,industry:84,talent:78,transport:86,research:88,layout:'poly'},
- industry:{settlement:68,industry:97,talent:78,transport:88,research:94,layout:'compact'},
- living:{settlement:98,industry:65,talent:68,transport:82,research:70,layout:'poly'},
- talent:{settlement:78,industry:76,talent:98,transport:84,research:96,layout:'linear'},
- first:{settlement:46,industry:42,talent:45,transport:52,research:39,layout:'linear'}
-};
-const sliderDefs=[['settlement','정주환경','주거·의료·교육·문화'],['industry','산업 클러스터','연관기업·창업·일자리'],['talent','지역인재 공급','대학·교육·채용'],['transport','광역교통','역·도로·환승'],['research','산학연 연계','대학·연구소·공공기관']];
-
-// ---------- Renderer ----------
-const scene=new THREE.Scene(); scene.background=new THREE.Color(0x07111f); scene.fog=new THREE.FogExp2(0x07111f,.012);
-const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,1600); camera.position.set(125,120,150);
-const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;$('#app').appendChild(renderer.domElement);
-const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.07;controls.minDistance=45;controls.maxDistance=330;controls.maxPolarAngle=Math.PI/2.12;controls.target.set(0,0,0);controls.screenSpacePanning=true;
-scene.add(new THREE.HemisphereLight(0x9bc8ff,0x172331,1.8));
-const sun=new THREE.DirectionalLight(0xfff2d5,3.0);sun.position.set(-90,180,70);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-220;sun.shadow.camera.right=220;sun.shadow.camera.top=220;sun.shadow.camera.bottom=-220;scene.add(sun);
-const fill=new THREE.DirectionalLight(0x6da9ff,1.1);fill.position.set(100,80,-120);scene.add(fill);
-
-const city=new THREE.Group();scene.add(city);const roads=new THREE.Group(),blocks=new THREE.Group(),buildings=new THREE.Group(),green=new THREE.Group(),props=new THREE.Group(),labels=new THREE.Group();city.add(roads,blocks,buildings,green,props,labels);
-const buildingData=[];const roadData=[];
-const mats={
- ground:new THREE.MeshStandardMaterial({color:0x0b1824,roughness:.95}), asphalt:new THREE.MeshStandardMaterial({color:0x172331,roughness:.82}), line:new THREE.MeshBasicMaterial({color:0x93b6c9}),
- institution:new THREE.MeshStandardMaterial({color:0x2f8bc5,roughness:.5,metalness:.12}), company:new THREE.MeshStandardMaterial({color:0x3eaa8d,roughness:.55}), university:new THREE.MeshStandardMaterial({color:0x8d74d8,roughness:.52}), research:new THREE.MeshStandardMaterial({color:0xd29a43,roughness:.48}), housing:new THREE.MeshStandardMaterial({color:0x6c8ca9,roughness:.65}), commerce:new THREE.MeshStandardMaterial({color:0xc96c73,roughness:.58}), station:new THREE.MeshStandardMaterial({color:0xe8d17b,roughness:.35,metalness:.2}), park:new THREE.MeshStandardMaterial({color:0x2d765c,roughness:1})};
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(520,520),mats.ground);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;city.add(ground);
-function box(w,h,d,mat,x,y,z,group=buildings,cast=true){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y+h/2,z);m.castShadow=cast;m.receiveShadow=true;group.add(m);return m}
-function cylinder(r,h,mat,x,y,z,group=props){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r*.86,h,12),mat);m.position.set(x,y+h/2,z);m.castShadow=true;group.add(m);return m}
-function road(x,z,w,d){const r=new THREE.Mesh(new THREE.BoxGeometry(w,.12,d),mats.asphalt);r.position.set(x,.05,z);r.receiveShadow=true;roads.add(r);roadData.push(r);for(let p=-w/2+5;p<w/2-2;p+=12){const l=new THREE.Mesh(new THREE.BoxGeometry(5,.012,.08),mats.line);l.position.set(x+p,.12,z);roads.add(l)} }
-function tree(x,z,s=1){const trunk=cylinder(.35*s,2*s,new THREE.MeshStandardMaterial({color:0x5b4638}),x,0,z,green);const crown=new THREE.Mesh(new THREE.SphereGeometry(1.8*s,9,7),new THREE.MeshStandardMaterial({color:0x34775a,roughness:1}));crown.position.set(x,3*s,z);crown.castShadow=true;green.add(crown)}
-function park(x,z,w=16,d=16){const p=new THREE.Mesh(new THREE.BoxGeometry(w,.08,d),mats.park);p.position.set(x,.05,z);p.receiveShadow=true;green.add(p);for(let i=0;i<8;i++)tree(x+rand(-w/2+2,w/2-2),z+rand(-d/2+2,d/2-2),rand(.7,1.1));}
-function addRoadNetwork(){while(roads.children.length)roads.remove(roads.children[0]);roadData.length=0;const t=state.transport/100;const spacing=lerp(42,25,t);for(let x=-120;x<=120;x+=spacing)road(x,0,4,250);for(let z=-120;z<=120;z+=spacing)road(0,z,250,4);road(0,0,250,7);}
-function clearGroup(g){while(g.children.length)g.remove(g.children[0]);}
-function layoutPoint(type,i,total){const angle=i*.618*2*Math.PI;const r=Math.sqrt(i/Math.max(total,1))*115; if(state.layout==='compact')return [Math.cos(angle)*r*.65,Math.sin(angle)*r*.65];if(state.layout==='linear')return [lerp(-120,120,i/(Math.max(total-1,1))),Math.sin(i*.9)*22];if(state.layout==='poly'){const centers=[[ -72,-58],[70,-55],[-60,62],[72,60]];const c=centers[i%4];const j=Math.floor(i/4);const a=j*.9;return [c[0]+Math.cos(a)*Math.min(28,7+j*3),c[1]+Math.sin(a)*Math.min(28,7+j*3)];}const centers=[[0,0],[-92,55],[92,55],[-90,-65],[90,-65]];const c=centers[i%5];return [c[0]+Math.cos(angle)*Math.min(22,5+Math.floor(i/5)*4),c[1]+Math.sin(angle)*Math.min(22,5+Math.floor(i/5)*4)];}
-function building(type,i,total,manual=false){const [x,z]=layoutPoint(type,i,total);let h=8,w=8,d=8;const cfg={institution:[14,20,13],company:[9,14,9],university:[17,11,14],research:[12,17,12],housing:[10,11,10],commerce:[8,8,8],station:[23,7,15]}[type]||[8,8,8];[w,h,d]=cfg;const density=1+(state.development/100)*.65;h*=density;const m=box(w,h,d,mats[type],x,0,z);m.userData={type,index:i,manual,name:{institution:'공공기관 본원',company:'연관 기업',university:'지역대학 캠퍼스',research:'산학연 연구소',housing:'정주 주거단지',commerce:'생활·상업시설',station:'광역교통 환승센터'}[type]};
-// rooftop
-if(type==='housing'||type==='company'||type==='institution'){const roof=new THREE.Mesh(new THREE.BoxGeometry(w*.72,.45,d*.72),new THREE.MeshStandardMaterial({color:0x182d42,roughness:.45}));roof.position.set(x,h+.22,z);roof.castShadow=true;buildings.add(roof)}
-if(type==='station'){for(let q=-6;q<=6;q+=4)box(2,1,18,new THREE.MeshStandardMaterial({color:0x9aa8b6,transparent:true,opacity:.5}),x+q,h*.45,z,buildings,false)}
-buildingData.push(m);return m;}
-function rebuildCity(){clearGroup(buildings);clearGroup(green);clearGroup(props);buildingData.length=0;addRoadNetwork();const counts={institution:Math.round(8+state.industry/18),company:Math.round(30+state.industry*.7),university:Math.round(2+state.talent/28),research:Math.round(4+state.research/18),housing:Math.round(34+state.settlement*.45),commerce:Math.round(12+state.settlement*.22),station:Math.round(1+state.transport/45)};let idx=0;for(const [type,n] of Object.entries(counts)){for(let i=0;i<n;i++)building(type,idx++,n);}
-park(-35,-35,27,25);park(45,-35,25,23);park(-42,42,25,22);if(state.settlement>75)park(55,43,28,24);
-// street trees
-const treeN=Math.round(35+state.settlement*.5);for(let i=0;i<treeN;i++){const a=Math.floor(rand(-5,6))*25+rand(-7,7),b=Math.floor(rand(-5,6))*25+rand(-7,7);tree(a,b,rand(.55,.9));}
-// transport hub visual ring
-const hub=new THREE.Mesh(new THREE.CylinderGeometry(17,17,.35,48),new THREE.MeshBasicMaterial({color:0x2f9ad0,transparent:true,opacity:.13}));hub.position.y=.2;props.add(hub);for(let a=0;a<8;a++){const ang=a*Math.PI/4;box(1.2,.35,9,new THREE.MeshStandardMaterial({color:0x2b6e93}),Math.cos(ang)*11,.25,Math.sin(ang)*11,props,false)}
+const $=id=>document.getElementById(id);
+const viewportEl=$('viewport'), loading=$('loading'), walkBtn=$('walkBtn'), mapBtn=$('mapBtn'), shotBtn=$('shotBtn'), fullBtn=$('fullBtn');
+const living=$('living'),industry=$('industry'),talent=$('talent'),transit=$('transit'),research=$('research');
+const vLiving=$('vLiving'),vIndustry=$('vIndustry'),vTalent=$('vTalent'),vTransit=$('vTransit'),vResearch=$('vResearch');
+const applyBtn=$('applyBtn'),year=$('year'),timeline=$('timeline'),backBtn=$('backBtn'),nextBtn=$('nextBtn'),fiveBtn=$('fiveBtn'),simBtn=$('simBtn'),resetBtn=$('resetBtn');
+const mPop=$('mPop'),mFirms=$('mFirms'),mJobs=$('mJobs'),mCommerce=$('mCommerce'),mVacancy=$('mVacancy'),mLink=$('mLink');
+const selection=$('selection'),selTitle=$('selTitle'),selText=$('selText'),walkHUD=$('walkHUD'),exitWalk=$('exitWalk'),posText=$('posText'),toastEl=$('toast'),joystick=$('joystick'),stick=$('stick');
+const viewport=viewportEl;
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0xdceaf2); scene.fog=new THREE.Fog(0xdceaf2,180,560);
+const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,1000); camera.position.set(55,48,65); camera.lookAt(0,0,0);
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,1.7)); renderer.setSize(innerWidth,innerHeight); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; renderer.outputColorSpace=THREE.SRGBColorSpace; viewport.appendChild(renderer.domElement);
+const hemi=new THREE.HemisphereLight(0xdff5ff,0x8b9b91,2.0); scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff1cf,3.0); sun.position.set(-90,140,70); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-180; sun.shadow.camera.right=180; sun.shadow.camera.top=180; sun.shadow.camera.bottom=-180; scene.add(sun);
+const ambient=new THREE.AmbientLight(0xffffff,.45);scene.add(ambient);
+const city=new THREE.Group();scene.add(city); const roadGroup=new THREE.Group();const buildingGroup=new THREE.Group();const detailGroup=new THREE.Group();const peopleGroup=new THREE.Group();const carGroup=new THREE.Group();city.add(roadGroup,buildingGroup,detailGroup,peopleGroup,carGroup);
+const raycaster=new THREE.Raycaster(), mouse=new THREE.Vector2(); let selected=null, walkMode=false, simTimer=null;
+const params={living:82,industry:84,talent:78,transit:86,research:88,layout:'mixed',year:2026,scenario:'optimal'};
+const colors={institution:0x315f8c,company:0x3d79a3,university:0x8a5aa8,research:0x477f72,housing:0xb97856,commercial:0xd0a33e,station:0x3e596e};
+const mats={}; for(const k in colors)mats[k]=new THREE.MeshStandardMaterial({color:colors[k],roughness:.55,metalness:.12});
+const roadMat=new THREE.MeshStandardMaterial({color:0x59666e,roughness:.92}); const sidewalkMat=new THREE.MeshStandardMaterial({color:0xb9c1c4,roughness:.95}); const glassMat=new THREE.MeshStandardMaterial({color:0x9ed8e8,roughness:.18,metalness:.2,transparent:true,opacity:.72});
+function box(w,h,d,mat,x,y,z,parent=detailGroup){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function clear(g){while(g.children.length){const o=g.children.pop();o.traverse(x=>{if(x.geometry)x.geometry.dispose()})}}
+function road(x,z,w,d){box(w,.28,d,roadMat,x,.08,z,roadGroup);if(w>d){for(let p=-w/2+5;p<w/2;p+=10)box(3,.015,.16,new THREE.MeshBasicMaterial({color:0xf5f1cf}),x+p,.23,z,roadGroup)}else{for(let p=-d/2+5;p<d/2;p+=10)box(.16,.015,3,new THREE.MeshBasicMaterial({color:0xf5f1cf}),x,.23,z+p,roadGroup)} }
+function sidewalk(x,z,w,d){box(w,.22,d,sidewalkMat,x,.27,z,roadGroup)}
+function windowGrid(x,z,w,d,h,kind){const mat=kind==='housing'?glassMat:new THREE.MeshStandardMaterial({color:0xbde8f1,roughness:.15,metalness:.05});const cols=Math.max(2,Math.floor(w/3));const rows=Math.max(2,Math.floor(h/3));for(let i=0;i<cols;i++)for(let j=0;j<rows;j++){if((i+j)%5===0&&kind!=='institution')continue;const px=x-w/2+1.3+i*(w-2.6)/(cols-1);const py=1.5+j*(h-3)/(rows-1);box(.8,.85,.06,mat,px,py,z-d/2-.04,detailGroup);box(.8,.85,.06,mat,px,py,z+d/2+.04,detailGroup)}}
+function building(x,z,w,d,h,type,name){const m=mats[type]||mats.company;const b=box(w,h,d,m,x,h/2,z,buildingGroup);b.userData={type,name,w,d,h};
+  const roof=box(w*.78,.22,d*.78,m,x,h+.15,z,detailGroup); roof.userData={decor:true};
+  if(h>8){windowGrid(x,z,w,d,h,type)}
+  if(type==='housing'){for(let y=4;y<h;y+=4)for(let s=-1;s<=1;s+=2)box(w*.68,.16,.35,new THREE.MeshStandardMaterial({color:0xede6d9}),x,y,z+s*d*.5,detailGroup)}
+  if(type==='institution'){const sign=box(Math.min(w*.65,10),1,.18,new THREE.MeshStandardMaterial({color:0xeaf3f7}),x,h*.42,z-d/2-.12,detailGroup);sign.userData={decor:true};}
+  if(type==='commercial'){for(let s=-1;s<=1;s+=2)box(w*.65,.12,.5,new THREE.MeshStandardMaterial({color:0x4d5c67}),x,h*.18,z+s*d*.5,detailGroup)}
+  if(type==='research'||type==='university'){for(let y=2;y<h;y+=3.2)box(w*.62,.08,d*.9,new THREE.MeshStandardMaterial({color:0xd9edf0}),x,y,z,detailGroup)}
+  return b;
 }
-rebuildCity();
-
-// ---------- UI ----------
-function buildSliders(){const wrap=$('#sliders');wrap.innerHTML='';for(const [id,label,desc] of sliderDefs){const d=document.createElement('div');d.className='slider';d.innerHTML=`<div class="slider-head"><span>${label}</span><b id="${id}V">${state[id]}</b></div><input class="range" id="${id}" type="range" min="0" max="100" value="${state[id]}" title="${desc}">`;wrap.appendChild(d);d.querySelector('input').addEventListener('input',e=>{state[id]=+e.target.value;$('#'+id+'V').textContent=state[id];recalculate(false);rebuildCity();updateUI();});}}
-buildSliders();
-function recalculate(push=true){const s=state.settlement/100,i=state.industry/100,t=state.talent/100,tr=state.transport/100,r=state.research/100;const years=state.year-2026;const synergy=(s*i+t*r+tr*r)/3;state.development=clamp(42+34*s+32*i+27*t+24*tr+29*r+28*synergy+years*.55-80,20,100);state.population=42000+years*(850*s+920*i+430*t+500*tr)+years*years*(8*s*i+5*s*tr);state.firms=310+Math.round(years*(12*i+6*r+3*tr))+Math.round(years*years*.025*i*r);state.jobs=18500+Math.round(years*(720*i+360*r+220*t));state.vacancy=clamp(12+years*(.5*(1-s)+.35*(1-i)-.3*tr)-state.commerce*.03,3,48);state.commerce=clamp(30+35*s+24*i+15*tr+years*(.55*s+.25*i),20,100);state.network=clamp(35+28*tr+27*r+18*i+years*.3,20,100);if(push)state.history.push({year:state.year,pop:state.population,firms:state.firms,jobs:state.jobs});}
-function updateUI(){const vals=[['인구',fmt(state.population),'명'],['연관기업',fmt(state.firms),'개'],['일자리',fmt(state.jobs),'개'],['상업 활성도',Math.round(state.commerce),'%'],['공실 위험',Math.round(state.vacancy),'%'],['연계 밀도',Math.round(state.network),'%']];$('#metrics').innerHTML=vals.map(v=>`<div class="metric"><span>${v[0]}</span><strong>${v[1]}</strong><em>${v[2]}</em></div>`).join('');$('#year').textContent=state.year;$('#progress').style.width=((state.year-2026)/20*100)+'%';
-const health=[['정주 안정성',state.settlement],['산업 집적',state.industry],['인재 파이프라인',state.talent],['교통 접근성',state.transport],['산학연 연계',state.research],['종합 발전도',state.development]];$('#health').innerHTML=health.map(([n,v])=>`<div class="health-row"><div class="health-head"><span>${n}</span><b>${Math.round(v)}</b></div><div class="bar"><i style="width:${clamp(v)}%"></i></div></div>`).join('');drawChart();}
-function drawChart(){const c=$('#chart'),ctx=c.getContext('2d'),r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=r.width*d;c.height=r.height*d;ctx.scale(d,d);const w=r.width,h=r.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='rgba(150,190,220,.1)';for(let y=15;y<h;y+=25){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}const hist=state.history.length?state.history:[{year:2026,pop:42000,firms:310}];const max=Math.max(...hist.map(x=>x.pop));ctx.strokeStyle='#6fc8ff';ctx.lineWidth=2;ctx.beginPath();hist.forEach((p,j)=>{const x=8+j/(Math.max(hist.length-1,1))*(w-16),y=h-10-(p.pop/max)*(h-24);j?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();}
-function setPreset(name){const p=presets[name];state.preset=name;for(const k of ['settlement','industry','talent','transport','research'])state[k]=p[k];state.layout=p.layout;state.year=2026;state.history=[];$$('.scenario').forEach(x=>x.classList.toggle('active',x.dataset.preset===name));$$('[data-layout]').forEach(x=>x.classList.toggle('active',x.dataset.layout===state.layout));for(const [id] of sliderDefs){$('#'+id).value=state[id];$('#'+id+'V').textContent=state[id]}recalculate();rebuildCity();updateUI();toast(`${name==='optimal'?'통합 최적형':name==='industry'?'산업 클러스터':name==='living'?'정주환경 중심':name==='talent'?'지역인재 중심':'1차 이전 방식'} 시나리오 적용`)}
-$$('.scenario').forEach(b=>b.addEventListener('click',()=>setPreset(b.dataset.preset)));
-$$('[data-layout]').forEach(b=>b.addEventListener('click',()=>{state.layout=b.dataset.layout;$$('[data-layout]').forEach(x=>x.classList.toggle('active',x===b));rebuildCity();toast('도시 공간 구조가 변경되었습니다')}));
-$$('[data-tool]').forEach(b=>b.addEventListener('click',()=>{state.tool=state.tool===b.dataset.tool?null:b.dataset.tool;$$('[data-tool]').forEach(x=>x.classList.toggle('active',x.dataset.tool===state.tool));renderer.domElement.style.cursor=state.tool?'crosshair':'grab';}));
-$('#eraseTool').addEventListener('click',()=>{state.tool=state.tool==='erase'?null:'erase';$$('[data-tool]').forEach(x=>x.classList.remove('active'));renderer.domElement.style.cursor=state.tool?'crosshair':'grab';toast(state.tool?'삭제할 건물을 탭하세요':'지우기 모드 종료')});
-function advance(n){if(state.year>=2046)return;state.year=Math.min(2046,state.year+n);recalculate();rebuildCity();updateUI();toast(`${state.year}년으로 이동`)}
-$('#plusYear').onclick=()=>advance(1);$('#plus5').onclick=()=>advance(5);$('#minusYear').onclick=()=>{state.year=Math.max(2026,state.year-1);recalculate();rebuildCity();updateUI()};$('#reset').onclick=()=>setPreset('optimal');
-$('#run20').onclick=async()=>{if(state.simulating)return;state.simulating=true;for(let y=state.year+1;y<=2046;y++){state.year=y;recalculate();rebuildCity();updateUI();await new Promise(r=>setTimeout(r,90));}state.simulating=false;toast('2046년 장기 시뮬레이션 완료');};
-$('#helpBtn').onclick=()=>$('#helpModal').classList.add('show');$('#closeHelp').onclick=()=>$('#helpModal').classList.remove('show');
-$('#fullscreenBtn').onclick=()=>document.documentElement.requestFullscreen?.();
-$('#snapshotBtn').onclick=()=>{const a=document.createElement('a');a.download=`UrbanTwin_${state.year}.png`;a.href=renderer.domElement.toDataURL('image/png');a.click();toast('도시 화면을 저장했습니다')};
-function toast(t){const x=$('#toast');x.textContent=t;x.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove('show'),1800)}
-
-// ---------- Picking / editing ----------
-const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
-renderer.domElement.addEventListener('pointerdown',e=>{mouse.x=e.clientX/innerWidth*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;ray.setFromCamera(mouse,camera);const hits=ray.intersectObjects(buildings.children,true);if(!hits.length)return;let obj=hits[0].object;while(obj.parent&&obj.parent!==buildings)obj=obj.parent;const data=obj.userData;if(state.tool){if(state.tool==='erase'){obj.parent?.remove(obj);const i=buildingData.indexOf(obj);if(i>=0)buildingData.splice(i,1);toast('건물을 제거했습니다');return;}addManual(state.tool,obj.position.x,obj.position.z);return;}selectBuilding(obj,data);});
-function addManual(type,x,z){const cfg={institution:[14,20,13],company:[9,14,9],university:[17,11,14],research:[12,17,12],housing:[10,11,10],commerce:[8,8,8],station:[23,7,15]}[type]||[8,8,8];const m=box(cfg[0],cfg[1]*(1+state.development/160),cfg[2],mats[type],x,0,z);m.userData={type,manual:true,name:{institution:'공공기관',company:'연관기업',university:'대학',research:'연구소',housing:'주거',commerce:'상업시설',station:'교통거점'}[type]};buildingData.push(m);state.tool=null;$$('[data-tool]').forEach(x=>x.classList.remove('active'));renderer.domElement.style.cursor='grab';toast('시설을 추가했습니다');}
-function selectBuilding(obj,data){const names={institution:'공공기관 본원',company:'연관 기업',university:'지역대학 캠퍼스',research:'산학연 연구소',housing:'정주 주거단지',commerce:'생활·상업시설',station:'광역교통 환승센터'};const effects={institution:'기업 유치의 기준점 · 공공서비스 공급',company:'일자리 증가 · 산업 집적 · 소비 수요',university:'지역인재 공급 · 산학협력 기반',research:'기술사업화 · 공공기관 공동연구',housing:'가족 정착 · 생활권 형성',commerce:'지역 소비 · 공실률 완화',station:'광역 접근성 · 통근/기업 교류 비용 절감'};$('#selection').classList.remove('empty');$('#selection').innerHTML=`<h3>${names[data.type]||data.name||'시설'}</h3><span class="pill">${data.type}</span><p>${effects[data.type]||'도시 공간 내 주요 시설'}</p><p>현재 시나리오에서 연계 가능성 <b>${Math.round(clamp((state.industry+state.transport+state.research)/3))}%</b></p>`;state.selected=obj;}
-
-// ---------- Atmosphere / animation ----------
-const stars=new THREE.Group();scene.add(stars);for(let i=0;i<500;i++){const g=new THREE.Mesh(new THREE.SphereGeometry(.12,4,4),new THREE.MeshBasicMaterial({color:0x6f8da8}));g.position.set(rand(-400,400),rand(70,220),rand(-400,400));stars.add(g)}
-const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();controls.update();props.children.forEach((o,i)=>{if(i===0)o.rotation.y=t*.08});if(state.selected){state.selected.scale.y=1+Math.sin(t*4)*.04;state.selected.scale.x=1+Math.sin(t*4)*.02;state.selected.scale.z=1+Math.sin(t*4)*.02}renderer.render(scene,camera)}animate();
-window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);updateUI()});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-recalculate();updateUI();setTimeout(()=>{$('#loading').style.opacity=0;setTimeout(()=>$('#loading').remove(),500)},500);
+function tree(x,z,scale=1){const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.16*scale,.22*scale,1.4*scale,8),new THREE.MeshStandardMaterial({color:0x765c42}));trunk.position.set(x,.9*scale,z);trunk.castShadow=true;detailGroup.add(trunk);const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(1.3*scale,1),new THREE.MeshStandardMaterial({color:0x3d8c62,roughness:.9}));crown.position.set(x,2.4*scale,z);crown.castShadow=true;detailGroup.add(crown)}
+function car(x,z,rot=0){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(2.4,.55,1.2),new THREE.MeshStandardMaterial({color:[0x2d6fa8,0xe7a83b,0xd85d55,0x4b5661][Math.floor(Math.random()*4)],roughness:.35,metalness:.25}));body.position.y=.65;body.castShadow=true;g.add(body);const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.35,.5,1.02),new THREE.MeshStandardMaterial({color:0x9fc4d1,roughness:.1,metalness:.2,transparent:true,opacity:.8}));cabin.position.set(-.1,1.05,0);g.add(cabin);for(const xw of [-.78,.78])for(const zw of [-.5,.5]){const wh=new THREE.Mesh(new THREE.CylinderGeometry(.25,.25,.16,12),new THREE.MeshStandardMaterial({color:0x20262a,roughness:.8}));wh.rotation.z=Math.PI/2;wh.position.set(xw,.42,zw);g.add(wh)}g.position.set(x,.1,z);g.rotation.y=rot;g.userData={speed:.25+Math.random()*.25,axis:Math.abs(Math.sin(rot))>.5?'x':'z'};carGroup.add(g)}
+function person(x,z,scale=1){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.CapsuleGeometry(.22*scale,.65*scale,4,8),new THREE.MeshStandardMaterial({color:0x466d8a}));body.position.y=.72*scale;g.add(body);const head=new THREE.Mesh(new THREE.SphereGeometry(.18*scale,12,8),new THREE.MeshStandardMaterial({color:0xe6bd91}));head.position.y=1.25*scale;g.add(head);g.position.set(x,0,z);peopleGroup.add(g)}
+function buildCity(){clear(roadGroup);clear(buildingGroup);clear(detailGroup);clear(peopleGroup);clear(carGroup);
+  const L=190; const roadGap=params.layout==='linear'?52:42;
+  // land and water/green belt
+  box(440,.4,440,new THREE.MeshStandardMaterial({color:0xcfe2cf,roughness:1}),0,-.25,0,roadGroup);
+  road(0,-95,400,7);road(0,95,400,7);road(-95,0,7,400);road(95,0,7,400);road(0,0,400,8);road(-55,0,7,400);road(55,0,7,400);road(0,-55,400,7);road(0,55,400,7);
+  sidewalk(0,-101,400,4);sidewalk(0,101,400,4);sidewalk(-101,0,4,400);sidewalk(101,0,4,400);
+  // central plaza / station
+  const station=building(0,-8,22,16,10,'station','광역교통 환승센터'); station.userData.landmark=true;
+  box(25,.25,18,new THREE.MeshStandardMaterial({color:0xa7c9d8}),0,.42,-8,detailGroup);
+  // park
+  const park=box(62,.18,42,new THREE.MeshStandardMaterial({color:0x8fc48f}),-75,.05,58,detailGroup); park.userData={type:'park',name:'중앙 녹지축'};
+  for(let i=0;i<22;i++)tree(-103+Math.random()*56,38+Math.random()*40,.65+Math.random()*.35);
+  const count=Math.floor(18+params.industry*.24); const hBoost=0.55+params.industry/100*.8; const livingBoost=.6+params.living/100*.7;
+  const types=['institution','company','research','university','housing','commercial'];
+  let idx=0;
+  for(let gx=-3;gx<=3;gx++)for(let gz=-3;gz<=3;gz++){if(gx===0&&gz===0)continue;const px=gx*30+(Math.random()*8-4),pz=gz*30+(Math.random()*8-4);let type;
+    if(params.layout==='linear')type=(Math.abs(gz)%3===0)?'company':'housing';
+    else if(params.layout==='compact')type=idx%4===0?'institution':(idx%3===0?'company':'housing');
+    else if(params.layout==='poly')type=(Math.abs(gx)===2||Math.abs(gz)===2)?'company':(idx%3===0?'research':'housing');
+    else type=types[idx%types.length];
+    if(params.industry>80&&idx<Math.floor(count*.45))type='company';
+    if(params.research>82&&idx%7===0)type='research';
+    if(params.living>85&&idx%4===0)type='housing';
+    const w=type==='housing'?12+Math.random()*7:10+Math.random()*8; const d=type==='housing'?10+Math.random()*7:10+Math.random()*8; let h=(type==='housing'?9+Math.random()*13:10+Math.random()*24)*hBoost;
+    if(type==='institution')h=20+params.industry*.16; if(type==='university')h=8+Math.random()*8; if(type==='research')h=12+Math.random()*16;
+    building(px,pz,w,d,h,type,({institution:'공공기관',company:'연관기업',research:'연구기관',university:'대학·인재양성센터',housing:'주거단지',commercial:'상업시설'})[type]);
+    idx++; if(idx>=count)break;
+  }
+  // commercial street and public realm
+  for(let x=-84;x<=84;x+=12){tree(x,12,.55);tree(x,-12,.55)}
+  for(let i=0;i<18;i++){person(-70+Math.random()*140,-65+Math.random()*130,.7+Math.random()*.35)}
+  for(let i=0;i<18;i++){const x=(Math.random()>.5?Math.floor(Math.random()*7-3)*30:0),z=x?Math.random()*180-90:Math.floor(Math.random()*7-3)*30;car(x,z,x?0:Math.PI/2)}
+  // high-speed rail/expressway visual corridor
+  if(params.transit>60){road(0,-135,420,5);road(0,135,420,5);for(let x=-190;x<=190;x+=20){box(1,.35,4,new THREE.MeshStandardMaterial({color:0x4b5357}),x,.55,-135,detailGroup);box(1,.35,4,new THREE.MeshStandardMaterial({color:0x4b5357}),x,.55,135,detailGroup)}}
+}
+function metrics(){const avg=(params.living+params.industry+params.talent+params.transit+params.research)/5;const y=params.year-2026;const growth=1+y*(.022+avg/10000);const pop=Math.round(42000*growth);const firms=Math.round(310*(1+y*(params.industry*.0008+params.research*.00045)));const jobs=Math.round(18500*(1+y*(params.industry*.0007+params.transit*.00025)));const commerce=Math.min(99,Math.round(55+params.living*.22+params.industry*.16+y*1.2));const vacancy=Math.max(4,Math.round(30-params.living*.16-params.industry*.08+y*(-.25)));const link=Math.min(99,Math.round((params.research*.42+params.talent*.25+params.industry*.18+params.transit*.15)));
+  mPop.textContent=pop.toLocaleString();mFirms.textContent=firms.toLocaleString();mJobs.textContent=jobs.toLocaleString();mCommerce.textContent=commerce;mVacancy.textContent=vacancy;mLink.textContent=link;
+  const vals=[params.living,params.industry,params.talent,params.transit,params.research];['Living','Industry','Talent','Transit','Research'].forEach((k,i)=>{$('b'+k).textContent=vals[i];$('bar'+k).style.width=vals[i]+'%'});drawChart();
+}
+function drawChart(){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#d8e4eb';ctx.lineWidth=1;for(let y=20;y<h;y+=26){ctx.beginPath();ctx.moveTo(8,y);ctx.lineTo(w-8,y);ctx.stroke()}ctx.strokeStyle='#199bd2';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<=20;i++){const yy=h-15-(h-30)*(Math.min(1,(i*(.025+(params.industry+params.living)/40000))));const xx=10+(w-20)*i/20;if(i===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy)}ctx.stroke()}
+function apply(){params.living=+living.value;params.industry=+industry.value;params.talent=+talent.value;params.transit=+transit.value;params.research=+research.value;params.layout=document.querySelector('.seg .active')?.dataset.layout||'mixed';buildCity();metrics();toast('정책 변수를 3D 공간에 적용했습니다.');}
+function setScenario(s){params.scenario=s;const presets={optimal:[82,84,78,86,88],industry:[68,96,72,82,92],living:[96,70,75,80,72],talent:[78,78,98,82,96],first:[55,55,45,62,35]};const v=presets[s];[living,industry,talent,transit,research].forEach((el,i)=>el.value=v[i]);updateLabels();apply()}
+function updateLabels(){[['living','vLiving'],['industry','vIndustry'],['talent','vTalent'],['transit','vTransit'],['research','vResearch']].forEach(([a,b])=>document.getElementById(b).textContent=document.getElementById(a).value)}
+function toast(t){const e=toastEl;e.textContent=t;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,1800)}
+[living,industry,talent,transit,research].forEach(e=>e.addEventListener('input',updateLabels));document.getElementById('applyBtn').onclick=apply;document.querySelectorAll('.scenario').forEach(b=>b.onclick=()=>{document.querySelectorAll('.scenario').forEach(x=>x.classList.remove('active'));b.classList.add('active');setScenario(b.dataset.scenario)});document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('active'));b.classList.add('active');params.layout=b.dataset.layout;apply()});
+function setYear(y){params.year=Math.max(2026,Math.min(2046,y));year.textContent=params.year;timeline.value=params.year;metrics();buildCity()}
+nextBtn.onclick=()=>setYear(params.year+1);backBtn.onclick=()=>setYear(params.year-1);fiveBtn.onclick=()=>setYear(params.year+5);timeline.oninput=()=>setYear(+timeline.value);resetBtn.onclick=()=>{params.year=2026;params.layout='mixed';params.living=82;params.industry=84;params.talent=78;params.transit=86;params.research=88;[living,industry,talent,transit,research].forEach((e,i)=>e.value=[82,84,78,86,88][i]);document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('active',x.dataset.layout==='mixed'));updateLabels();buildCity();metrics()};simBtn.onclick=()=>{clearInterval(simTimer);simTimer=setInterval(()=>{if(params.year>=2046){clearInterval(simTimer);return}setYear(params.year+1)},180)};
+viewport.addEventListener('pointerdown',e=>{if(walkMode)return;drag=true;lastX=e.clientX;lastY=e.clientY});let drag=false,lastX=0,lastY=0;viewport.addEventListener('pointermove',e=>{if(!drag||walkMode)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;camera.position.x-=dx*.16;camera.position.z-=dy*.16;camera.lookAt(0,0,0)});addEventListener('pointerup',()=>drag=false);viewport.addEventListener('wheel',e=>{if(walkMode)return;camera.position.multiplyScalar(e.deltaY>0?1.06:.94);camera.position.y=Math.max(20,camera.position.y)});
+viewport.addEventListener('pointerup',e=>{if(walkMode)return;mouse.x=e.clientX/innerWidth*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(buildingGroup.children);if(hits.length){const o=hits[0].object;selected=o;selection.classList.remove('hidden');selTitle.textContent=o.userData.name||'도시 시설';selText.textContent=`유형: ${o.userData.type} · 높이 ${Math.round(o.userData.h)}m · 규모 ${Math.round(o.userData.w)}×${Math.round(o.userData.d)}m`;}}
+function enterWalk(){walkMode=true;document.querySelectorAll('.panel,.topbar,.bottom').forEach(e=>e.classList.add('hidden'));walkHUD.classList.remove('hidden');camera.position.set(12,1.8,45);yaw=0;pitch=0;toast('탐방 모드 시작 · 화면 오른쪽을 드래그하세요');}
+function exitWalkMode(){walkMode=false;walkHUD.classList.add('hidden');document.querySelectorAll('.panel,.topbar,.bottom').forEach(e=>e.classList.remove('hidden'));camera.position.set(55,48,65);camera.lookAt(0,0,0)}
+walkBtn.onclick=enterWalk;mapBtn.onclick=exitWalkMode;exitWalk.onclick=exitWalkMode;shotBtn.onclick=()=>{const a=document.createElement('a');a.download=`UrbanTwin_${params.year}.png`;a.href=renderer.domElement.toDataURL('image/png');a.click()};fullBtn.onclick=()=>document.documentElement.requestFullscreen?.();
+let yaw=0,pitch=0,lookStart=null,move={x:0,y:0};const look=document.querySelector('.look-zone');look.addEventListener('pointerdown',e=>{if(!walkMode)return;lookStart={x:e.clientX,y:e.clientY}});look.addEventListener('pointermove',e=>{if(!walkMode||!lookStart)return;const dx=e.clientX-lookStart.x,dy=e.clientY-lookStart.y;lookStart={x:e.clientX,y:e.clientY};yaw-=dx*.004;pitch=Math.max(-1.2,Math.min(1.2,pitch-dy*.003))});look.addEventListener('pointerup',()=>lookStart=null);
+const joy=joystick;let joyId=null;joy.addEventListener('pointerdown',e=>{joyId=e.pointerId;joy.setPointerCapture(joyId);moveJoy(e)});joy.addEventListener('pointermove',e=>{if(e.pointerId===joyId)moveJoy(e)});joy.addEventListener('pointerup',()=>{joyId=null;move.x=move.y=0;stick.style.transform='translate(0,0)'});function moveJoy(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=38,len=Math.hypot(dx,dy);if(len>max){dx*=max/len;dy*=max/len}move.x=dx/max;move.y=-dy/max;stick.style.transform=`translate(${dx}px,${dy}px)`}
+const keys={};addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+function walkUpdate(dt){let fx=Math.sin(yaw),fz=Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);let mx=move.x+(keys.d?1:0)-(keys.a?1:0),my=move.y+(keys.w?1:0)-(keys.s?1:0);const speed=13*dt;camera.position.x+=(fx*my+rx*mx)*speed;camera.position.z+=(fz*my+rz*mx)*speed;camera.position.x=Math.max(-185,Math.min(185,camera.position.x));camera.position.z=Math.max(-185,Math.min(185,camera.position.z));camera.position.y=1.8;const dir=new THREE.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));camera.lookAt(camera.position.clone().add(dir));posText.textContent=`${camera.position.x.toFixed(0)}, ${camera.position.z.toFixed(0)}`}
+function animate(t){requestAnimationFrame(animate);const dt=Math.min(.04,(t-(animate.last||t))/1000);animate.last=t;if(walkMode)walkUpdate(dt);for(const c of carGroup.children){if(c.userData.axis==='x'){c.position.x+=c.userData.speed;if(c.position.x>205)c.position.x=-205}else{c.position.z+=c.userData.speed;if(c.position.z>205)c.position.z=-205}}renderer.render(scene,camera)}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+setTimeout(()=>{loading.remove();buildCity();metrics();animate(0)},400);
