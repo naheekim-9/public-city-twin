@@ -1,84 +1,64 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>2차 공공기관 이전 · Urban Digital Twin</title>
-<script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
-<style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07101c;color:#eef5ff;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}#app{width:100%;height:100%;position:relative}canvas{display:block}.ui{position:absolute;inset:0;pointer-events:none}.panel{pointer-events:auto;background:rgba(8,16,29,.88);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);box-shadow:0 14px 40px rgba(0,0,0,.28);border-radius:18px}.top{position:absolute;left:16px;right:16px;top:14px;height:64px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px}.title{font-weight:800;font-size:16px}.sub{font-size:11px;color:#93a8c4;margin-top:3px}.badge{font-size:11px;padding:7px 10px;border-radius:999px;background:#10243a;color:#9fd1ff;border:1px solid #1d4a70}.left{position:absolute;left:16px;top:92px;width:290px;max-height:calc(100vh - 108px);overflow:auto;padding:14px}.right{position:absolute;right:16px;top:92px;width:270px;max-height:calc(100vh - 108px);overflow:auto;padding:14px}.section{margin-bottom:16px}.section h3{font-size:12px;margin:0 0 9px;color:#b8c9df}.btns{display:grid;grid-template-columns:1fr 1fr;gap:7px}.btn{border:1px solid #263b54;background:#101e2e;color:#eaf3ff;border-radius:10px;padding:9px 8px;font-size:11px;font-weight:700}.btn.active,.btn:hover{background:#173553;border-color:#3d78a9}.wide{width:100%;margin-top:7px}.danger{background:#301c22;border-color:#63313c}.slider{margin:11px 0}.row{display:flex;justify-content:space-between;font-size:11px;color:#c8d5e6;margin-bottom:5px}.row b{color:#fff}.range{width:100%;accent-color:#65b7ff}.metric{display:grid;grid-template-columns:1fr 1fr;gap:7px}.card{background:#0d1b2a;border:1px solid #20344b;border-radius:12px;padding:9px}.card span{display:block;color:#8297b0;font-size:9px}.card strong{display:block;margin-top:4px;font-size:17px}.timeline{height:9px;background:#13263b;border-radius:99px;overflow:hidden}.timeline i{display:block;height:100%;width:0;background:#65b7ff;border-radius:99px}.info{font-size:11px;line-height:1.55;color:#b9c9dc}.legend{display:flex;flex-wrap:wrap;gap:6px}.legend span{font-size:9px;padding:5px 7px;background:#102033;border-radius:8px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}.hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);padding:8px 12px;font-size:10px;color:#b9c9dc}.modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(360px,calc(100vw - 32px));padding:16px;display:none}.modal.show{display:block}.modal h2{font-size:16px;margin:0 0 8px}.modal p{font-size:11px;color:#aebed2;line-height:1.55}.close{float:right;background:none;border:0;color:#fff;font-size:18px}.small{font-size:9px;color:#71869e}.select{width:100%;padding:9px;border-radius:10px;background:#101e2e;color:#fff;border:1px solid #263b54;font-size:11px}.pill{display:inline-block;padding:4px 7px;border-radius:999px;background:#10283b;color:#a8d6ff;font-size:9px;margin:2px}
-</style></head>
-<body><div id="app"></div><div class="ui">
-<div class="top panel"><div><div class="title">2차 공공기관 이전 · Urban Digital Twin</div><div class="sub">공공기관 · 산업 · 대학/연구 · 정주 · 교통의 상호작용을 공간으로 시뮬레이션</div></div><div class="badge">2026 → 2046</div></div>
-<div class="left panel">
-<div class="section"><h3>시나리오</h3><div class="btns"><button class="btn active" data-preset="optimal">통합 최적형</button><button class="btn" data-preset="industry">산업 클러스터</button><button class="btn" data-preset="living">정주환경 중심</button><button class="btn" data-preset="talent">지역인재 중심</button><button class="btn" data-preset="first">1차 이전 방식</button><button class="btn" data-layout="poly">다핵형 배치</button></div></div>
-<div class="section"><h3>도시 배치</h3><select id="layout" class="select"><option value="compact">집약형</option><option value="linear">선형형</option><option value="poly" selected>다핵형</option><option value="mixed">혼합형</option></select></div>
-<div class="section"><h3>핵심 변수</h3>
-<div class="slider"><div class="row"><span>정주환경</span><b id="settleV">80</b></div><input id="settle" class="range" type="range" min="0" max="100" value="80"></div>
-<div class="slider"><div class="row"><span>산업 클러스터</span><b id="industryV">82</b></div><input id="industry" class="range" type="range" min="0" max="100" value="82"></div>
-<div class="slider"><div class="row"><span>지역인재 공급</span><b id="talentV">76</b></div><input id="talent" class="range" type="range" min="0" max="100" value="76"></div>
-<div class="slider"><div class="row"><span>광역교통</span><b id="transportV">84</b></div><input id="transport" class="range" type="range" min="0" max="100" value="84"></div>
-<div class="slider"><div class="row"><span>산학연 연계</span><b id="researchV">86</b></div><input id="research" class="range" type="range" min="0" max="100" value="86"></div>
-</div>
-<div class="section"><h3>시간 진행</h3><div class="timeline"><i id="timebar"></i></div><div class="btns" style="margin-top:8px"><button class="btn" id="y1">+1년</button><button class="btn" id="y5">+5년</button></div><button class="btn wide" id="y20">▶ 2046년까지 시뮬레이션</button><button class="btn wide danger" id="reset">↺ 2026년으로 초기화</button></div>
-</div>
-<div class="right panel"><div class="section"><h3>도시 성과</h3><div class="metric"><div class="card"><span>정착인구</span><strong id="pop">0</strong></div><div class="card"><span>입주기업</span><strong id="firms">0</strong></div><div class="card"><span>일자리</span><strong id="jobs">0</strong></div><div class="card"><span>상권활성도</span><strong id="commerce">0%</strong></div><div class="card"><span>정주안정성</span><strong id="stability">0%</strong></div><div class="card"><span>연계밀도</span><strong id="network">0%</strong></div></div></div>
-<div class="section"><h3>도시 구성</h3><div class="legend"><span>🏛 공공기관</span><span>🏢 기업</span><span>🎓 대학</span><span>🔬 연구</span><span>🏠 주거</span><span>🛍 상업</span><span>🚉 교통</span><span>🌳 녹지</span></div></div>
-<div class="section"><h3>선택한 공간</h3><div id="info" class="info">건물을 탭하면 해당 공간의 역할과 예상 효과가 표시됩니다.</div></div>
-<div class="section"><h3>모델 해석</h3><div id="interpret" class="info"></div></div>
-</div>
-<div class="hint panel">드래그: 회전 · 핀치/휠: 확대·축소 · 건물 탭: 정보</div>
-<div id="modal" class="modal panel"><button class="close" id="close">×</button><h2 id="mTitle"></h2><p id="mText"></p></div>
-</div>
-<script>
-const app=document.getElementById('app');
-const scene=new THREE.Scene(); scene.background=new THREE.Color(0x07111d); scene.fog=new THREE.Fog(0x07111d,90,190);
-const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,500); camera.position.set(72,72,82); camera.lookAt(0,0,0);
-const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; app.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0x9cc9ff,0x172235,2.0)); const sun=new THREE.DirectionalLight(0xffffff,2.5); sun.position.set(50,100,30); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); scene.add(sun);
-const world=new THREE.Group(); scene.add(world);
-const mats={ground:new THREE.MeshStandardMaterial({color:0x0d1a28,roughness:1}),road:new THREE.MeshStandardMaterial({color:0x1b2b3c,roughness:.85}),roadline:new THREE.MeshBasicMaterial({color:0x71859b}),park:new THREE.MeshStandardMaterial({color:0x183b31,roughness:1}),public:new THREE.MeshStandardMaterial({color:0x5d9bd3,roughness:.38,metalness:.2}),company:new THREE.MeshStandardMaterial({color:0x7386a2,roughness:.42}),uni:new THREE.MeshStandardMaterial({color:0x9a78c8,roughness:.4}),research:new THREE.MeshStandardMaterial({color:0x43b7b0,roughness:.4}),housing:new THREE.MeshStandardMaterial({color:0xa98e72,roughness:.55}),commercial:new THREE.MeshStandardMaterial({color:0xd3a44e,roughness:.45}),station:new THREE.MeshStandardMaterial({color:0xd85d67,roughness:.3,metalness:.3})};
-let buildings=[],trees=[],roads=[],year=2026,drag=false,lastX=0,lastY=0,theta=.75,phi=.68,radius=115;
-const cfg={settle:80,industry:82,talent:76,transport:84,research:86,layout:'poly'};
-function box(x,y,z,sx,sy,sz,mat,type,name){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(x,y+sy/2,z);m.castShadow=true;m.receiveShadow=true;m.userData={type,name,baseY:sy};world.add(m);buildings.push(m);return m}
-function cyl(x,y,z,r,h,mat){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r*.9,h,12),mat);m.position.set(x,y+h/2,z);m.castShadow=true;world.add(m);trees.push(m)}
-function clearWorld(){while(world.children.length)world.remove(world.children[0]);buildings=[];trees=[];roads=[]}
-function ground(){const g=new THREE.Mesh(new THREE.BoxGeometry(180,2,180),mats.ground);g.position.y=-1;g.receiveShadow=true;world.add(g);for(let i=-80;i<=80;i+=10){let l=new THREE.Mesh(new THREE.BoxGeometry(1,.04,160),mats.roadline);l.position.set(i,.03,0);world.add(l);let q=new THREE.Mesh(new THREE.BoxGeometry(160,.04,1),mats.roadline);q.position.set(0,.03,i);world.add(q)}}
-function road(x,z,w,d){const m=new THREE.Mesh(new THREE.BoxGeometry(w,.25,d),mats.road);m.position.set(x,.12,z);m.receiveShadow=true;world.add(m);roads.push(m)}
-function park(x,z,w,d){const m=new THREE.Mesh(new THREE.BoxGeometry(w,.18,d),mats.park);m.position.set(x,.09,z);world.add(m);for(let i=0;i<Math.max(4,Math.floor(w*d/250));i++)cyl(x+(Math.random()-.5)*w*.8,.1,z+(Math.random()-.5)*d*.8,.8+Math.random()*.5,2+Math.random()*2,mats.park)}
-function station(x,z){box(x,0,z,12,3,8,mats.station,'station','광역교통 거점');for(let i=-5;i<=5;i+=2){const p=new THREE.Mesh(new THREE.BoxGeometry(.7,.2,14),mats.roadline);p.position.set(x+i,.3,z);world.add(p)}}
-function build(){clearWorld();ground();
- const L=cfg.layout;
- let hubs=L==='linear'?[-42,0,42]:L==='compact'?[0]:L==='poly'?[-35,35,-35,35]:[-35,0,35,0];
- if(L==='poly'){hubs.forEach((v,i)=>{const x=i<2?v: v,z=i<2?-32:32; road(x,0,10,160); road(0,z,160,10)});}
- else if(L==='linear'){road(0,0,150,10);road(-42,0,10,120);road(0,0,10,120);road(42,0,10,120)}
- else {road(0,0,160,12);road(0,0,12,160)}
- station(cfg.transport>60?0:55,0);
- // public core
- const pCount=8+Math.round(cfg.industry/20); for(let i=0;i<pCount;i++){let a=i*Math.PI*2/pCount,r=8;box(Math.cos(a)*r,0,Math.sin(a)*r,5+Math.random()*2,9+Math.random()*8,5+Math.random()*2,mats.public,'public','공공기관 핵심기관 '+(i+1))}
- park(-22,-22,25,20);park(25,25,28,18);
- // university/research
- for(let i=0;i<Math.round(2+cfg.research/25);i++){let x=-28+i*9,z=28;box(x,0,z,7,5+cfg.research*.035,7,mats.uni,'university','지역대학·인재양성센터');box(x+4,0,z+10,6,6+cfg.research*.035,6,mats.research,'research','산학연 공동연구소')}
- // companies clustered around public core
- const n=10+Math.round(cfg.industry*.42); for(let i=0;i<n;i++){let a=i*2.399,r=22+Math.sqrt(i)*2.4;let x=Math.cos(a)*r,z=Math.sin(a)*r;box(x,0,z,4+Math.random()*3,4+cfg.industry*.045+Math.random()*7,4+Math.random()*3,mats.company,'company','연관 산업기업 '+(i+1))}
- // housing + commercial based on settlement
- const h=8+Math.round(cfg.settle*.34);for(let i=0;i<h;i++){let a=i*1.73,r=45+Math.random()*28;let x=Math.cos(a)*r,z=Math.sin(a)*r;box(x,0,z,6,5+cfg.settle*.055+Math.random()*8,6,mats.housing,'housing','정주 주거단지 '+(i+1)); if(i%2===0)box(x+8,0,z+4,5,3+cfg.settle*.025,5,mats.commercial,'commercial','생활상업지 '+(i/2+1))}
- for(let i=0;i<30;i++)cyl((Math.random()-.5)*160,.1,(Math.random()-.5)*160,.7+Math.random()*.5,2+Math.random()*3,mats.park);
- updateMetrics();
-}
-function simulate(add){year=Math.min(2046,year+add);build();animateGrowth(add)}
-function animateGrowth(add){const start=performance.now();const from=0;function f(t){let k=Math.min(1,(t-start)/1000);buildings.forEach((b,i)=>{b.scale.y=k;b.position.y=(b.userData.baseY*b.scale.y)/2});if(k<1)requestAnimationFrame(f)}requestAnimationFrame(f)}
-function score(){const s=cfg;return Math.round((s.settle*.23+s.industry*.22+s.talent*.16+s.transport*.18+s.research*.21))}
-function updateMetrics(){const S=score();const yrs=year-2026;const growth=1+yrs*(.012+S/10000);const pop=Math.round((18000+cfg.settle*260)*growth);const firms=Math.round((28+cfg.industry*1.35+cfg.research*.25)*(1+yrs*(cfg.industry+cfg.research)/14000));const jobs=Math.round(firms*(24+cfg.industry*.18));const commerce=Math.min(99,Math.round(cfg.settle*.35+cfg.industry*.2+cfg.transport*.2+cfg.talent*.12+yrs*1.5));const stability=Math.min(99,Math.round(cfg.settle*.38+cfg.transport*.18+cfg.talent*.16+cfg.research*.1+yrs*1.1));const network=Math.min(99,Math.round(cfg.industry*.22+cfg.transport*.2+cfg.research*.3+cfg.talent*.18+yrs*.8));
- document.getElementById('pop').textContent=pop.toLocaleString();document.getElementById('firms').textContent=firms;document.getElementById('jobs').textContent=jobs.toLocaleString();document.getElementById('commerce').textContent=commerce+'%';document.getElementById('stability').textContent=stability+'%';document.getElementById('network').textContent=network+'%';document.getElementById('timebar').style.width=((year-2026)/20*100)+'%';document.querySelector('.badge').textContent=year+' / 2046';
- let text=S>=80?'현재 변수 조합은 공공기관을 중심으로 산업·인재·연구·정주가 함께 성장하는 통합형에 가깝습니다.':S>=60?'핵심 기능은 형성되지만 특정 요소가 약해질 경우 기업 유입이나 정착 효과가 제한될 수 있습니다.':'공공기관 이전만으로는 파급효과가 작습니다. 교통·정주·산학연 연계를 함께 강화하는 것이 필요합니다.';document.getElementById('interpret').textContent=text}
-function applyPreset(p){const vals={optimal:[80,82,76,84,86],industry:[65,96,70,78,94],living:[96,65,72,82,72],talent:[78,74,98,80,90],first:[48,42,35,38,30]}[p];['settle','industry','talent','transport','research'].forEach((id,i)=>{cfg[id]=vals[i];document.getElementById(id).value=vals[i];document.getElementById(id+'V').textContent=vals[i]});document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset===p));year=2026;build()}
-['settle','industry','talent','transport','research'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{cfg[id]=+e.target.value;document.getElementById(id+'V').textContent=e.target.value;build()}));
-document.getElementById('layout').addEventListener('change',e=>{cfg.layout=e.target.value;build()});document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>applyPreset(b.dataset.preset)));document.querySelector('[data-layout]').addEventListener('click',()=>{document.getElementById('layout').value='poly';cfg.layout='poly';build()});
-document.getElementById('y1').onclick=()=>simulate(1);document.getElementById('y5').onclick=()=>simulate(5);document.getElementById('y20').onclick=()=>{year=2046;build();animateGrowth(20)};document.getElementById('reset').onclick=()=>{year=2026;applyPreset('optimal')};
-// camera touch/mouse
-renderer.domElement.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY});window.addEventListener('pointerup',()=>drag=false);window.addEventListener('pointermove',e=>{if(!drag)return;theta-=(e.clientX-lastX)*.006;phi=Math.max(.32,Math.min(1.35,phi+(e.clientY-lastY)*.006));lastX=e.clientX;lastY=e.clientY;updateCamera()});renderer.domElement.addEventListener('wheel',e=>{radius=Math.max(45,Math.min(180,radius+e.deltaY*.08));updateCamera()},{passive:true});let touchDist=0;renderer.domElement.addEventListener('touchmove',e=>{if(e.touches.length===2){let dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY,d=Math.hypot(dx,dy);if(touchDist)radius=Math.max(45,Math.min(180,radius-(d-touchDist)*.25));touchDist=d;updateCamera()}},{passive:true});renderer.domElement.addEventListener('touchend',()=>touchDist=0);
-function updateCamera(){camera.position.set(Math.cos(theta)*Math.sin(phi)*radius,Math.cos(phi)*radius,Math.sin(theta)*Math.sin(phi)*radius);camera.lookAt(0,0,0)}
-const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();renderer.domElement.addEventListener('pointerup',e=>{if(Math.abs(e.clientX-lastX)>5)return;const r=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;ray.setFromCamera(mouse,camera);const hit=ray.intersectObjects(buildings);if(hit.length){const d=hit[0].object.userData;document.getElementById('info').innerHTML='<b>'+d.name+'</b><br><span class="pill">'+d.type+'</span><br>도시 내 기능적 역할과 주변 시설과의 연결을 시각적으로 확인할 수 있는 공간입니다.'}});
-document.getElementById('close').onclick=()=>document.getElementById('modal').classList.remove('show');
-function loop(){requestAnimationFrame(loop);renderer.render(scene,camera)}function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}window.addEventListener('resize',resize);applyPreset('optimal');updateCamera();loop();
-</script></body></html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#07111f">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<title>UrbanTwin — 2차 공공기관 이전</title>
+</head>
+<body>
+<div id="app"></div>
+<div id="loading"><div class="loader"></div><b>도시 디지털 트윈을 불러오는 중…</b><span>공간·교통·산업·정주 모델 초기화</span></div>
+<header class="topbar glass">
+  <div><div class="brand">URBAN<span>TWIN</span></div><div class="subtitle">2차 공공기관 이전 · 도시 클러스터 시뮬레이터</div></div>
+  <div class="top-actions"><button id="helpBtn">사용법</button><button id="snapshotBtn">스냅샷</button><button id="fullscreenBtn">전체화면</button></div>
+</header>
+<aside class="sidebar left glass">
+  <div class="panel-title">시나리오</div>
+  <div class="scenario-grid">
+    <button data-preset="optimal" class="scenario active">통합 최적형<small>균형형</small></button>
+    <button data-preset="industry" class="scenario">산업 클러스터<small>기업·일자리</small></button>
+    <button data-preset="living" class="scenario">정주환경 중심<small>주거·상권</small></button>
+    <button data-preset="talent" class="scenario">지역인재 중심<small>대학·연구</small></button>
+    <button data-preset="first" class="scenario">1차 이전 방식<small>비교 기준</small></button>
+  </div>
+  <div class="divider"></div>
+  <div class="panel-title">도시 구조</div>
+  <div class="seg"><button data-layout="compact">집약</button><button data-layout="linear">선형</button><button data-layout="poly" class="active">다핵</button><button data-layout="mixed">혼합</button></div>
+  <div class="divider"></div>
+  <div class="panel-title">핵심 정책 변수</div>
+  <div id="sliders"></div>
+  <div class="divider"></div>
+  <div class="panel-title">직접 공간 편집</div>
+  <div class="tool-grid">
+    <button data-tool="institution">🏛 기관</button><button data-tool="company">🏢 기업</button>
+    <button data-tool="university">🎓 대학</button><button data-tool="research">🔬 연구소</button>
+    <button data-tool="housing">🏠 주거</button><button data-tool="commerce">🛍 상업</button>
+    <button data-tool="park">🌳 공원</button><button data-tool="station">🚉 역</button>
+  </div>
+  <button id="eraseTool" class="wide danger">지우기 모드</button>
+</aside>
+<aside class="sidebar right glass">
+  <div class="panel-title">도시 성과</div>
+  <div class="metrics" id="metrics"></div>
+  <div class="divider"></div>
+  <div class="panel-title">성장 경로</div>
+  <div class="chart-wrap"><canvas id="chart"></canvas></div>
+  <div class="divider"></div>
+  <div class="panel-title">클러스터 건강도</div>
+  <div id="health"></div>
+  <div class="divider"></div>
+  <div class="panel-title">선택 건물</div>
+  <div id="selection" class="selection empty">건물을 탭하면 공간 기능과 연계 효과가 표시됩니다.</div>
+</aside>
+<footer class="bottom glass">
+  <div class="time"><span class="year" id="year">2026</span><div class="timeline"><i id="progress"></i></div><span>2046</span></div>
+  <div class="time-buttons"><button id="minusYear">−1년</button><button id="plusYear">+1년</button><button id="plus5">+5년</button><button id="run20" class="primary">▶ 20년 시뮬레이션</button><button id="reset">초기화</button></div>
+</footer>
+<div id="toast"></div>
+<div id="helpModal" class="modal glass"><button class="modal-close" id="closeHelp">×</button><h2>UrbanTwin 사용법</h2><p>화면을 한 손가락으로 드래그하면 도시를 회전합니다. 두 손가락으로 확대·축소할 수 있습니다.</p><p><b>정책 변수</b>를 바꾸면 기업·주거·교통·대학·연구시설의 공간 배치와 성장률이 함께 변합니다.</p><p><b>직접 공간 편집</b>에서 시설을 선택한 뒤 빈 토지를 탭하면 건물이 추가됩니다. 건물을 탭하면 상세 정보가 열립니다.</p><p><b>+1년 / +5년 / 20년</b>으로 2026년부터 2046년까지 단계별 성장 과정을 확인할 수 있습니다.</p></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
