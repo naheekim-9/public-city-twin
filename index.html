@@ -18,223 +18,227 @@ html,body{
  height:100%;
  overflow:hidden;
  background:#07101c;
- color:#fff;
- font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+ color:white;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
 #app{
- width:100vw;
- height:100vh;
- position:relative;
- overflow:hidden
+ position:fixed;
+ inset:0;
 }
 
-#scene{
+#city{
  position:absolute;
- inset:0
-}
-
-canvas{
- display:block;
- width:100%;
- height:100%;
- touch-action:none
+ inset:0;
 }
 
 #panel{
  position:absolute;
  left:18px;
  top:18px;
- bottom:18px;
- width:390px;
- max-width:calc(100vw - 36px);
+ width:370px;
+ max-height:calc(100vh - 36px);
+ overflow:auto;
  padding:22px;
+ border-radius:22px;
+ background:rgba(7,16,28,.93);
  border:1px solid rgba(255,255,255,.12);
- border-radius:24px;
- background:rgba(7,15,27,.90);
- backdrop-filter:blur(20px);
- overflow-y:auto;
+ backdrop-filter:blur(18px);
+ box-shadow:0 20px 60px rgba(0,0,0,.4);
  z-index:10;
- box-shadow:0 20px 70px rgba(0,0,0,.35)
 }
 
-.logo{
+h1{
+ margin:0;
  font-size:25px;
- font-weight:900;
- letter-spacing:-1px
+ letter-spacing:-1px;
 }
 
-.sub{
- color:#91a0b7;
- font-size:13px;
+.subtitle{
  margin-top:5px;
- margin-bottom:20px
+ color:#93a4bb;
+ font-size:13px;
 }
 
 .section{
  margin-top:20px;
- margin-bottom:10px;
- color:#91a0b7;
- font-size:12px;
- font-weight:700;
- letter-spacing:.5px
 }
 
-.row{
+.section-title{
+ color:#91a4bd;
+ font-size:12px;
+ margin-bottom:9px;
+ font-weight:700;
+}
+
+.grid{
  display:grid;
  grid-template-columns:1fr 1fr;
  gap:8px;
- margin-bottom:8px
 }
 
 button{
  border:0;
- color:#fff;
- background:#18283e;
- padding:11px 10px;
  border-radius:12px;
- font-size:13px;
+ padding:12px 10px;
+ background:#14263d;
+ color:white;
  font-weight:700;
- cursor:pointer
+ font-size:13px;
 }
 
 button:active{
- transform:scale(.97)
+ transform:scale(.97);
 }
 
 button.active{
- background:#367cff;
- box-shadow:0 5px 18px rgba(54,124,255,.28)
+ background:#347cff;
 }
 
-label{
- display:block;
- margin:13px 0
+.slider{
+ margin:13px 0;
 }
 
-.labelrow{
+.slider-top{
  display:flex;
  justify-content:space-between;
- margin-bottom:7px;
  font-size:13px;
- font-weight:700
+ font-weight:700;
 }
 
 .value{
- color:#74a7ff
+ color:#65a0ff;
 }
 
 input[type=range]{
  width:100%;
- accent-color:#4c8dff;
- height:5px
+ margin-top:7px;
+ accent-color:#3985ff;
 }
 
-.time{
+.time-buttons{
  display:grid;
- grid-template-columns:1fr 1fr 1.5fr;
- gap:7px
+ grid-template-columns:1fr 1fr 1.4fr;
+ gap:7px;
 }
 
-.stats{
+.metrics{
  display:grid;
  grid-template-columns:1fr 1fr;
- gap:9px;
- margin-top:12px
+ gap:8px;
+ margin-top:12px;
 }
 
-.stat{
- background:rgba(255,255,255,.06);
- border:1px solid rgba(255,255,255,.06);
- border-radius:15px;
- padding:13px
+.metric{
+ padding:12px;
+ border-radius:13px;
+ background:#111e31;
 }
 
-.stat small{
+.metric small{
  display:block;
- color:#8b99ad;
- font-size:11px;
- margin-bottom:5px
+ color:#8192a9;
+ font-size:10px;
 }
 
-.stat strong{
- font-size:22px
+.metric strong{
+ display:block;
+ margin-top:4px;
+ font-size:19px;
 }
 
 #info{
  position:absolute;
- right:20px;
- top:20px;
- width:290px;
- max-width:calc(100vw - 40px);
+ right:22px;
+ top:22px;
+ width:310px;
  padding:18px;
  border-radius:18px;
- background:rgba(7,15,27,.88);
+ background:rgba(7,16,28,.94);
+ border:1px solid rgba(255,255,255,.14);
  backdrop-filter:blur(16px);
- border:1px solid rgba(255,255,255,.12);
- z-index:8;
- display:none
+ z-index:20;
+ display:none;
 }
 
-#info h3{
- margin:0 0 8px
+#info h2{
+ margin:0 0 7px;
+ font-size:18px;
 }
 
 #info p{
- color:#aab5c5;
- font-size:13px;
- line-height:1.55;
- margin:5px 0
+ margin:5px 0;
+ color:#b9c6d8;
+ font-size:12px;
+ line-height:1.5;
 }
 
-#closeInfo{
- float:right;
- background:#26364d;
- padding:5px 9px
+#close{
+ position:absolute;
+ right:10px;
+ top:10px;
+ width:30px;
+ height:30px;
+ padding:0;
+ border-radius:50%;
+}
+
+#legend{
+ position:absolute;
+ right:22px;
+ bottom:22px;
+ padding:13px 15px;
+ border-radius:15px;
+ background:rgba(7,16,28,.88);
+ font-size:11px;
+ color:#b9c6d8;
+ z-index:10;
+}
+
+.legend-row{
+ display:flex;
+ align-items:center;
+ gap:7px;
+ margin:4px 0;
+}
+
+.dot{
+ width:9px;
+ height:9px;
+ border-radius:50%;
 }
 
 #hint{
  position:absolute;
- bottom:18px;
+ bottom:20px;
  left:50%;
  transform:translateX(-50%);
- background:rgba(7,15,27,.78);
- padding:9px 16px;
- border-radius:30px;
- color:#b9c5d6;
- font-size:12px;
- z-index:6;
- white-space:nowrap
-}
-
-#loading{
- position:absolute;
- inset:0;
- display:flex;
- align-items:center;
- justify-content:center;
- background:#07101c;
- z-index:100;
- font-weight:800;
- font-size:20px
+ padding:10px 16px;
+ border-radius:20px;
+ background:rgba(7,16,28,.85);
+ color:#b9c6d8;
+ font-size:11px;
+ z-index:5;
+ white-space:nowrap;
 }
 
 @media(max-width:800px){
  #panel{
-  width:330px;
-  max-height:82vh;
-  bottom:auto
+  width:340px;
+  left:12px;
+  top:12px;
+  max-height:calc(100vh - 24px);
  }
- #info{
-  top:auto;
-  bottom:65px
- }
-}
 
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{
- background:#31425b;
- border-radius:5px
+ #info{
+  right:12px;
+  top:12px;
+  width:280px;
+ }
+
+ #legend{
+  display:none;
+ }
 }
 </style>
 </head>
@@ -243,133 +247,154 @@ input[type=range]{
 
 <div id="app">
 
-<div id="loading">🏙️ CITY TWIN 불러오는 중...</div>
-
-<div id="scene"></div>
+<canvas id="city"></canvas>
 
 <div id="panel">
 
-<div class="logo">🏙️ PUBLIC CITY TWIN</div>
-<div class="sub">2차 공공기관 이전 · 도시 시뮬레이션</div>
+<h1>🏙️ PUBLIC CITY TWIN</h1>
+<div class="subtitle">2차 공공기관 이전 · 도시 시뮬레이션</div>
 
-<div class="section">도시 모델</div>
+<div class="section">
+<div class="section-title">도시 모델</div>
 
-<div class="row">
+<div class="grid">
 <button class="preset active" data-preset="optimal">통합 최적형</button>
 <button class="preset" data-preset="industry">산업 클러스터</button>
-</div>
-
-<div class="row">
 <button class="preset" data-preset="living">정주환경 중심</button>
 <button class="preset" data-preset="talent">지역인재 중심</button>
 </div>
+</div>
 
-<div class="section">공간 구조</div>
+<div class="section">
+<div class="section-title">공간 구조</div>
 
-<div class="row">
+<div class="grid">
 <button class="layout active" data-layout="compact">집약형</button>
 <button class="layout" data-layout="linear">선형형</button>
+<button class="layout" data-layout="polycentric">다핵형</button>
+<button class="layout" data-layout="mixed">혼합형</button>
+</div>
 </div>
 
-<button class="layout" data-layout="multi" style="width:100%">다핵형</button>
+<div class="section">
 
-<div class="section">정책 변수</div>
+<div class="section-title">정책 변수</div>
 
-<label>
- <div class="labelrow">
-  <span>정주환경</span>
-  <span class="value" id="settlementVal">75</span>
- </div>
- <input id="settlement" type="range" min="0" max="100" value="75">
-</label>
-
-<label>
- <div class="labelrow">
-  <span>산업 클러스터</span>
-  <span class="value" id="industryVal">80</span>
- </div>
- <input id="industry" type="range" min="0" max="100" value="80">
-</label>
-
-<label>
- <div class="labelrow">
-  <span>지역인재</span>
-  <span class="value" id="talentVal">65</span>
- </div>
- <input id="talent" type="range" min="0" max="100" value="65">
-</label>
-
-<label>
- <div class="labelrow">
-  <span>광역교통망</span>
-  <span class="value" id="transportVal">80</span>
- </div>
- <input id="transport" type="range" min="0" max="100" value="80">
-</label>
-
-<label>
- <div class="labelrow">
-  <span>산학연 연계</span>
-  <span class="value" id="researchVal">75</span>
- </div>
- <input id="research" type="range" min="0" max="100" value="75">
-</label>
-
-<div class="section">시간 이동</div>
-
-<div class="time">
-<button id="oneYear">+1년</button>
-<button id="fiveYear">+5년</button>
-<button id="twentyYear" class="active">20년 시뮬레이션</button>
+<div class="slider">
+<div class="slider-top">
+<span>정주환경</span>
+<span class="value" id="vLiving">80</span>
+</div>
+<input id="living" type="range" min="0" max="100" value="80">
 </div>
 
-<div class="section">현재 도시</div>
-
-<div class="stats">
-
-<div class="stat">
-<small>현재 시점</small>
-<strong id="year">2026</strong>
+<div class="slider">
+<div class="slider-top">
+<span>산업 클러스터</span>
+<span class="value" id="vIndustry">85</span>
+</div>
+<input id="industry" type="range" min="0" max="100" value="85">
 </div>
 
-<div class="stat">
+<div class="slider">
+<div class="slider-top">
+<span>지역인재</span>
+<span class="value" id="vTalent">70</span>
+</div>
+<input id="talent" type="range" min="0" max="100" value="70">
+</div>
+
+<div class="slider">
+<div class="slider-top">
+<span>광역교통망</span>
+<span class="value" id="vTransport">80</span>
+</div>
+<input id="transport" type="range" min="0" max="100" value="80">
+</div>
+
+<div class="slider">
+<div class="slider-top">
+<span>산학연 연계</span>
+<span class="value" id="vResearch">75</span>
+</div>
+<input id="research" type="range" min="0" max="100" value="75">
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="section-title">시간 이동</div>
+
+<div class="time-buttons">
+<button id="year1">+1년</button>
+<button id="year5">+5년</button>
+<button id="year20" class="active">20년 시뮬레이션</button>
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="section-title">도시 현황</div>
+
+<div style="color:#70a5ff;font-size:12px;margin-bottom:5px">
+현재 시점 : <b id="year">2026</b>년
+</div>
+
+<div class="metrics">
+
+<div class="metric">
 <small>인구</small>
 <strong id="population">40,000</strong>
 </div>
 
-<div class="stat">
+<div class="metric">
 <small>기업</small>
 <strong id="firms">120</strong>
 </div>
 
-<div class="stat">
+<div class="metric">
 <small>일자리</small>
-<strong id="jobs">18,000</strong>
+<strong id="jobs">21,000</strong>
 </div>
 
-<div class="stat">
-<small>상업 공실률</small>
-<strong id="vacancy">35%</strong>
+<div class="metric">
+<small>상업 활성도</small>
+<strong id="commerce">64%</strong>
 </div>
 
-<div class="stat">
-<small>클러스터 지수</small>
-<strong id="cluster">78</strong>
+<div class="metric">
+<small>정주 안정성</small>
+<strong id="settlement">61%</strong>
 </div>
 
+<div class="metric">
+<small>산학연 연계</small>
+<strong id="network">67%</strong>
+</div>
+
+</div>
 </div>
 
 </div>
 
 <div id="info">
-<button id="closeInfo">×</button>
-<h3 id="infoTitle">건물</h3>
-<p id="infoText"></p>
+<button id="close">×</button>
+<h2 id="infoTitle">건물</h2>
+<div id="infoBody"></div>
 </div>
 
-<div id="hint">
-👆 드래그: 도시 회전 · 두 손가락/휠: 확대·축소 · 건물 터치
+<div id="legend">
+
+<div class="legend-row"><span class="dot" style="background:#397cff"></span>공공기관</div>
+<div class="legend-row"><span class="dot" style="background:#e09a4d"></span>기업</div>
+<div class="legend-row"><span class="dot" style="background:#49a98d"></span>대학</div>
+<div class="legend-row"><span class="dot" style="background:#9c67d7"></span>연구소</div>
+<div class="legend-row"><span class="dot" style="background:#687b94"></span>주거</div>
 </div>
+
+<div id="hint">👆 드래그: 도시 회전 · 두 손가락/휠: 확대·축소 · 건물 터치</div>
 
 </div>
 
@@ -377,181 +402,86 @@ input[type=range]{
 
 <script>
 
-let scene,camera,renderer;
-let cityGroup=new THREE.Group();
-let raycaster=new THREE.Raycaster();
-let mouse=new THREE.Vector2();
+const canvas=document.getElementById("city");
 
-let buildings=[];
-let roads=[];
-let trees=[];
+const renderer=new THREE.WebGLRenderer({
+ canvas,
+ antialias:true,
+ powerPreference:"high-performance"
+});
 
-let rotationX=.78;
-let rotationY=.65;
-let distance=150;
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
-let dragging=false;
-let lastX=0;
-let lastY=0;
+const scene=new THREE.Scene();
 
-let year=2026;
+scene.background=new THREE.Color(0x07101c);
 
-let population=40000;
-let firms=120;
-let jobs=18000;
-let vacancy=35;
+const camera=new THREE.PerspectiveCamera(
+45,
+innerWidth/innerHeight,
+0.1,
+1000
+);
 
-let params={
- settlement:75,
- industry:80,
- talent:65,
+camera.position.set(95,95,95);
+
+const ambient=new THREE.HemisphereLight(
+0x9fb7d9,
+0x111827,
+2
+);
+
+scene.add(ambient);
+
+const sun=new THREE.DirectionalLight(
+0xffffff,
+3
+);
+
+sun.position.set(50,100,40);
+sun.castShadow=true;
+
+scene.add(sun);
+
+const cityGroup=new THREE.Group();
+scene.add(cityGroup);
+
+const clickable=[];
+
+let layout="compact";
+let simYear=2026;
+
+let values={
+ living:80,
+ industry:85,
+ talent:70,
  transport:80,
  research:75
 };
 
-let currentLayout="compact";
+const raycaster=new THREE.Raycaster();
+const mouse=new THREE.Vector2();
 
-init();
-animate();
-
-function init(){
-
- scene=new THREE.Scene();
-
- scene.background=new THREE.Color(0x07101c);
-
- camera=new THREE.PerspectiveCamera(
-  45,
-  window.innerWidth/window.innerHeight,
-  .1,
-  1000
- );
-
- renderer=new THREE.WebGLRenderer({
-  antialias:true,
-  powerPreference:"high-performance"
- });
-
- renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
- renderer.setSize(window.innerWidth,window.innerHeight);
-
- renderer.shadowMap.enabled=true;
- renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-
- document.getElementById("scene").appendChild(renderer.domElement);
-
- const ambient=new THREE.HemisphereLight(
-  0xbfd8ff,
-  0x172030,
-  2
- );
-
- scene.add(ambient);
-
- const sun=new THREE.DirectionalLight(0xffffff,2.8);
-
- sun.position.set(-80,120,60);
- sun.castShadow=true;
-
- sun.shadow.mapSize.width=2048;
- sun.shadow.mapSize.height=2048;
-
- scene.add(sun);
-
- scene.add(cityGroup);
-
- createGround();
- createCity();
-
- setupControls();
- setupUI();
-
- document.getElementById("loading").style.display="none";
-
- resize();
-
- window.addEventListener("resize",resize);
-}
-
-function createGround(){
-
- const geo=new THREE.PlaneGeometry(300,300);
-
- const mat=new THREE.MeshStandardMaterial({
-  color:0x293448,
-  roughness:1
- });
-
- const ground=new THREE.Mesh(geo,mat);
-
- ground.rotation.x=-Math.PI/2;
- ground.receiveShadow=true;
-
- cityGroup.add(ground);
-
-}
-
-function createCity(){
-
- clearCity();
-
- createRoadNetwork();
-
- createParks();
-
- createStation();
-
- createInstitutions();
-
- createHousing();
-
- createBusinesses();
-
- createTrees();
-
-}
-
-function clearCity(){
-
- while(cityGroup.children.length>1){
-
-  const obj=cityGroup.children[cityGroup.children.length-1];
-
-  cityGroup.remove(obj);
-
- }
-
- buildings=[];
- roads=[];
- trees=[];
-}
-
-function material(color,rough=.8){
+function material(color){
 
  return new THREE.MeshStandardMaterial({
-  color:color,
-  roughness:rough,
-  metalness:.05
+  color,
+  roughness:.72,
+  metalness:.08
  });
 
 }
 
-function building(x,z,w,d,h,type){
+function box(x,y,z,w,h,d,color,type,data){
 
- let color;
-
- if(type==="public") color=0x3e73b8;
- if(type==="business") color=0x5d6675;
- if(type==="university") color=0x8069ad;
- if(type==="research") color=0x328b87;
- if(type==="housing") color=0x7b8796;
- if(type==="commerce") color=0xc08a54;
-
- const geo=new THREE.BoxGeometry(w,h,d);
+ const geometry=new THREE.BoxGeometry(w,h,d);
 
  const mesh=new THREE.Mesh(
-  geo,
-  material(color,.65)
+  geometry,
+  material(color)
  );
 
  mesh.position.set(x,h/2,z);
@@ -560,634 +490,724 @@ function building(x,z,w,d,h,type){
  mesh.receiveShadow=true;
 
  mesh.userData={
-  type:type,
-  title:getBuildingName(type),
-  height:h
+  type,
+  ...data
  };
 
  cityGroup.add(mesh);
- buildings.push(mesh);
-
- addWindows(mesh,w,d,h,type);
+ clickable.push(mesh);
 
  return mesh;
+
 }
 
-function getBuildingName(type){
+function clearCity(){
 
- const names={
-  public:"공공기관 이전청사",
-  business:"연관 기업",
-  university:"지역 대학",
-  research:"연구개발센터",
-  housing:"주거단지",
-  commerce:"상업시설"
- };
+ while(cityGroup.children.length){
 
- return names[type];
-}
+  const obj=cityGroup.children.pop();
 
-function addWindows(mesh,w,d,h,type){
+  obj.geometry?.dispose();
+  obj.material?.dispose();
 
- const floors=Math.max(2,Math.floor(h/3));
-
- const windowMat=new THREE.MeshBasicMaterial({
-  color:type==="housing"?0xd6e6ff:0xaed2ff
- });
-
- for(let i=1;i<floors;i++){
-
-  if(i>12) break;
-
-  const count=Math.max(2,Math.floor(w/2.5));
-
-  for(let j=0;j<count;j++){
-
-   const win=new THREE.Mesh(
-    new THREE.PlaneGeometry(.65,.8),
-    windowMat
-   );
-
-   win.position.set(
-    -w/2+1+j*(w-2)/(count-1),
-    i*2.8,
-    d/2+.012
-   );
-
-   mesh.add(win);
-
-   const win2=win.clone();
-
-   win2.rotation.y=Math.PI;
-   win2.position.z=-d/2-.012;
-
-   mesh.add(win2);
-  }
  }
+
+ clickable.length=0;
+
 }
 
-function createRoad(x1,z1,x2,z2,width=4){
+function road(x,z,w,d){
 
- const dx=x2-x1;
- const dz=z2-z1;
- const len=Math.sqrt(dx*dx+dz*dz);
+ const g=new THREE.BoxGeometry(w,.35,d);
 
- const geo=new THREE.BoxGeometry(len,.12,width);
-
- const mesh=new THREE.Mesh(
-  geo,
-  material(0x171f2b)
+ const m=new THREE.Mesh(
+  g,
+  material(0x273447)
  );
 
- mesh.position.set(
-  (x1+x2)/2,
-  .07,
-  (z1+z2)/2
+ m.position.set(x,.15,z);
+
+ cityGroup.add(m);
+
+}
+
+function tree(x,z){
+
+ const trunk=box(
+  x,0,z,
+  .7,3,.7,
+  0x594633,
+  "tree",
+  {}
  );
 
- mesh.rotation.y=-Math.atan2(dz,dx);
+ const crown=new THREE.Mesh(
+  new THREE.SphereGeometry(2.2,10,10),
+  material(0x176b4d)
+ );
 
- mesh.receiveShadow=true;
+ crown.position.set(x,4,z);
+ crown.castShadow=true;
 
- cityGroup.add(mesh);
- roads.push(mesh);
-
-}
-
-function createRoadNetwork(){
-
- if(currentLayout==="compact"){
-
-  createRoad(-100,0,100,0,5);
-  createRoad(0,-100,0,100,5);
-
-  createRoad(-75,-75,75,75,3);
-  createRoad(-75,75,75,-75,3);
-
- }
-
- if(currentLayout==="linear"){
-
-  createRoad(-120,0,120,0,6);
-  createRoad(-100,-40,100,-40,3);
-  createRoad(-100,40,100,40,3);
-
- }
-
- if(currentLayout==="multi"){
-
-  createRoad(-110,0,110,0,5);
-  createRoad(0,-110,0,110,5);
-
-  createRoad(-90,-70,90,-70,3);
-  createRoad(-90,70,90,70,3);
-
- }
+ cityGroup.add(crown);
 
 }
 
-function createParks(){
+function park(x,z,size=10){
 
- const parkMat=material(0x355d45);
+ const g=new THREE.BoxGeometry(size,.3,size);
 
- let parks=[
-  [-45,-45,25,25],
-  [45,45,28,20],
-  [55,-35,18,30],
-  [-55,35,22,18]
- ];
+ const m=new THREE.Mesh(
+  g,
+  material(0x173f35)
+ );
 
- parks.forEach(p=>{
+ m.position.set(x,.15,z);
 
-  const mesh=new THREE.Mesh(
-   new THREE.BoxGeometry(p[2],.25,p[3]),
-   parkMat
+ cityGroup.add(m);
+
+ for(let i=0;i<4;i++){
+
+  tree(
+   x+(Math.random()-.5)*size*.7,
+   z+(Math.random()-.5)*size*.7
   );
 
-  mesh.position.set(p[0],.12,p[1]);
-  mesh.receiveShadow=true;
+ }
 
-  cityGroup.add(mesh);
+}
+
+function createBuilding(type,x,z,scale=1){
+
+ let color;
+ let baseH;
+ let width;
+
+ if(type==="public"){
+  color=0x397cff;
+  baseH=18;
+  width=7;
+ }
+
+ if(type==="firm"){
+  color=0xe09a4d;
+  baseH=12;
+  width=6;
+ }
+
+ if(type==="university"){
+  color=0x49a98d;
+  baseH=10;
+  width=10;
+ }
+
+ if(type==="research"){
+  color=0x9c67d7;
+  baseH=15;
+  width=7;
+ }
+
+ if(type==="housing"){
+  color=0x687b94;
+  baseH=16;
+  width=6;
+ }
+
+ if(type==="commercial"){
+  color=0xc66c75;
+  baseH=8;
+  width=7;
+ }
+
+ const height=baseH*scale;
+
+ return box(
+  x,0,z,
+  width,height,width,
+  color,
+  type,
+  {}
+ );
+
+}
+
+function generateCity(){
+
+ clearCity();
+
+ // ground
+ const ground=new THREE.Mesh(
+  new THREE.BoxGeometry(180,.5,180),
+  material(0x303a4b)
+ );
+
+ ground.position.y=-.25;
+ ground.receiveShadow=true;
+ cityGroup.add(ground);
+
+ // main roads
+ road(0,0,180,5);
+ road(0,0,5,180);
+
+ road(-45,0,180,2.5);
+ road(45,0,180,2.5);
+
+ road(0,-45,2.5,180);
+ road(0,45,2.5,180);
+
+ // station
+ const station=box(
+  0,0,-48,
+  18,5,8,
+  0xdce6f2,
+  "station",
+  {}
+ );
+
+ // parks
+ park(-28,-28,18);
+ park(28,28,18);
+ park(-55,55,14);
+
+ let publicCount=0;
+ let firmCount=0;
+
+ const density=.55+(values.industry/100)*.5;
+ const livingDensity=.45+(values.living/100)*.65;
+
+ // central public institutions
+ const publics=[
+  [-18,-10],
+  [0,-10],
+  [18,-10],
+  [-18,10],
+  [18,10]
+ ];
+
+ publics.forEach((p,i)=>{
+
+  createBuilding(
+   "public",
+   p[0],
+   p[1],
+   1+values.industry/150
+  );
+
+  publicCount++;
 
  });
 
-}
-
-function createStation(){
-
- const station=new THREE.Mesh(
-  new THREE.BoxGeometry(24,4,10),
-  material(0xd4d7dc)
+ // university + research
+ createBuilding(
+  "university",
+  -25,-27,
+  1+values.talent/180
  );
 
- station.position.set(0,2,-70);
- station.castShadow=true;
+ createBuilding(
+  "research",
+  25,-27,
+  1+values.research/180
+ );
 
- station.userData={
-  title:"광역교통 거점역",
-  type:"station",
-  description:"KTX·SRT 및 광역교통과 연계되는 핵심 교통 거점"
- };
+ // layout-dependent businesses
+ for(let i=0;i<26;i++){
 
- cityGroup.add(station);
- buildings.push(station);
+  let x,z;
 
-}
+  if(layout==="compact"){
 
-function createInstitutions(){
+   x=(Math.random()-.5)*75;
+   z=(Math.random()-.5)*55;
 
- if(currentLayout==="compact"){
+  }
 
-  building(-18,-8,12,12,24,"public");
-  building(18,-8,12,12,30,"public");
-  building(0,15,15,12,27,"public");
+  else if(layout==="linear"){
 
-  building(-30,20,10,10,16,"research");
-  building(30,20,10,10,18,"university");
+   x=(Math.random()-.5)*150;
+   z=(Math.random()-.5)*18;
 
- }
+  }
 
- if(currentLayout==="linear"){
+  else if(layout==="polycentric"){
 
-  building(-65,-10,12,12,28,"public");
-  building(-30,-10,12,12,24,"public");
-  building(10,-10,12,12,32,"public");
-  building(45,-10,12,12,27,"public");
+   const centers=[
+    [-40,-35],
+    [40,-35],
+    [-40,35],
+    [40,35]
+   ];
 
-  building(75,15,15,12,20,"research");
-  building(-75,15,15,12,18,"university");
+   const c=centers[i%4];
 
- }
+   x=c[0]+(Math.random()-.5)*25;
+   z=c[1]+(Math.random()-.5)*25;
 
- if(currentLayout==="multi"){
+  }
 
-  building(-45,-30,13,13,28,"public");
-  building(45,-30,13,13,30,"public");
+  else{
 
-  building(-45,30,13,13,24,"public");
-  building(45,30,13,13,27,"public");
+   x=(Math.random()-.5)*110;
+   z=(Math.random()-.5)*75;
 
-  building(0,0,18,14,30,"research");
-  building(0,55,20,14,20,"university");
+  }
 
- }
+  const industrial=values.industry/100;
 
-}
+  if(Math.random()<industrial){
 
-function createHousing(){
-
- const density=.5+params.settlement/100;
-
- for(let i=0;i<28;i++){
-
-  let angle=i/28*Math.PI*2;
-  let radius=65+(i%4)*9;
-
-  if(currentLayout==="linear"){
-
-   let x=-100+i*7;
-   let z=(i%2===0?25:-25);
-
-   building(
+   createBuilding(
+    "firm",
     x,z,
-    8,8,
-    10+Math.random()*14*density,
-    "housing"
+    .7+Math.random()*.9
    );
+
+   firmCount++;
 
   }else{
 
-   let x=Math.cos(angle)*radius;
-   let z=Math.sin(angle)*radius;
-
-   building(
+   createBuilding(
+    "commercial",
     x,z,
-    8,8,
-    10+Math.random()*18*density,
-    "housing"
+    .6+Math.random()*.7
    );
 
   }
 
  }
 
-}
+ // housing
+ const housingN=Math.floor(18+values.living*.22);
 
-function createBusinesses(){
+ for(let i=0;i<housingN;i++){
 
- const count=Math.floor(20+params.industry*.35);
+  let x=(Math.random()-.5)*140;
+  let z=(Math.random()-.5)*110;
 
- for(let i=0;i<count;i++){
-
-  let angle=i/count*Math.PI*2;
-  let radius=35+Math.random()*25;
-
-  let x=Math.cos(angle)*radius;
-  let z=Math.sin(angle)*radius;
-
-  building(
+  createBuilding(
+   "housing",
    x,z,
-   6+Math.random()*5,
-   6+Math.random()*5,
-   7+Math.random()*14*(params.industry/100),
-   i%5===0?"commerce":"business"
+   .6+livingDensity*.8
   );
 
  }
 
-}
+ // extra trees
+ for(let i=0;i<55;i++){
 
-function createTrees(){
-
- for(let i=0;i<100;i++){
-
-  let x=(Math.random()-.5)*230;
-  let z=(Math.random()-.5)*230;
-
-  if(Math.abs(x)<15 && Math.abs(z)<15) continue;
-
-  const trunk=new THREE.Mesh(
-   new THREE.CylinderGeometry(.35,.5,2,8),
-   material(0x65452d)
+  tree(
+   (Math.random()-.5)*160,
+   (Math.random()-.5)*150
   );
-
-  trunk.position.set(x,1,z);
-
-  const crown=new THREE.Mesh(
-   new THREE.SphereGeometry(2+Math.random()*1.5,10,8),
-   material(0x39734d)
-  );
-
-  crown.position.set(x,3,z);
-
-  trunk.castShadow=true;
-  crown.castShadow=true;
-
-  cityGroup.add(trunk);
-  cityGroup.add(crown);
-
-  trees.push(trunk,crown);
 
  }
 
-}
-
-function setupControls(){
-
- const c=renderer.domElement;
-
- c.addEventListener("pointerdown",e=>{
-
-  dragging=true;
-  lastX=e.clientX;
-  lastY=e.clientY;
-
- });
-
- c.addEventListener("pointermove",e=>{
-
-  if(!dragging)return;
-
-  let dx=e.clientX-lastX;
-  let dy=e.clientY-lastY;
-
-  rotationY+=dx*.006;
-  rotationX+=dy*.004;
-
-  rotationX=Math.max(.35,Math.min(1.3,rotationX));
-
-  lastX=e.clientX;
-  lastY=e.clientY;
-
- });
-
- c.addEventListener("pointerup",()=>{
-  dragging=false;
- });
-
- c.addEventListener("pointercancel",()=>{
-  dragging=false;
- });
-
- c.addEventListener("wheel",e=>{
-
-  distance+=e.deltaY*.08;
-
-  distance=Math.max(65,Math.min(240,distance));
-
- });
-
- c.addEventListener("pointerup",pickBuilding);
+ updateMetrics();
 
 }
 
-function pickBuilding(e){
+function updateMetrics(){
 
- if(Math.abs(e.clientX-lastX)>8)return;
+ const policy=
+ (
+  values.living+
+  values.industry+
+  values.talent+
+  values.transport+
+  values.research
+ )/5;
 
- const rect=renderer.domElement.getBoundingClientRect();
+ const growth=(simYear-2026);
+
+ const population=Math.round(
+  40000+
+  growth*(170+policy*3)
+ );
+
+ const firms=Math.round(
+  120+
+  growth*(1.5+values.industry*.035+values.research*.015)
+ );
+
+ const jobs=Math.round(
+  21000+
+  growth*(220+values.industry*4+values.research*2)
+ );
+
+ const commerce=Math.min(
+  99,
+  Math.round(
+   25+
+   values.living*.25+
+   values.industry*.18+
+   values.transport*.2+
+   growth*.7
+  )
+ );
+
+ const settlement=Math.min(
+  99,
+  Math.round(
+   values.living*.45+
+   values.transport*.2+
+   values.talent*.15+
+   growth*.45
+  )
+ );
+
+ const network=Math.min(
+  99,
+  Math.round(
+   values.research*.45+
+   values.talent*.2+
+   values.industry*.2+
+   values.transport*.1+
+   growth*.4
+  )
+ );
+
+ document.getElementById("year").textContent=simYear;
+ document.getElementById("population").textContent=population.toLocaleString();
+ document.getElementById("firms").textContent=firms.toLocaleString();
+ document.getElementById("jobs").textContent=jobs.toLocaleString();
+ document.getElementById("commerce").textContent=commerce+"%";
+ document.getElementById("settlement").textContent=settlement+"%";
+ document.getElementById("network").textContent=network+"%";
+
+}
+
+function setValues(){
+
+ values.living=+living.value;
+ values.industry=+industry.value;
+ values.talent=+talent.value;
+ values.transport=+transport.value;
+ values.research=+research.value;
+
+ vLiving.textContent=values.living;
+ vIndustry.textContent=values.industry;
+ vTalent.textContent=values.talent;
+ vTransport.textContent=values.transport;
+ vResearch.textContent=values.research;
+
+ generateCity();
+
+}
+
+[
+ ["living","vLiving"],
+ ["industry","vIndustry"],
+ ["talent","vTalent"],
+ ["transport","vTransport"],
+ ["research","vResearch"]
+].forEach(([id,val])=>{
+
+ document.getElementById(id).addEventListener(
+  "input",
+  setValues
+ );
+
+});
+
+document.querySelectorAll(".layout").forEach(btn=>{
+
+ btn.addEventListener("click",()=>{
+
+  document.querySelectorAll(".layout")
+   .forEach(x=>x.classList.remove("active"));
+
+  btn.classList.add("active");
+
+  layout=btn.dataset.layout;
+
+  generateCity();
+
+ });
+
+});
+
+const presets={
+
+ optimal:{
+  living:82,
+  industry:88,
+  talent:75,
+  transport:85,
+  research:82
+ },
+
+ industry:{
+  living:62,
+  industry:95,
+  talent:65,
+  transport:78,
+  research:90
+ },
+
+ living:{
+  living:96,
+  industry:62,
+  talent:70,
+  transport:80,
+  research:65
+ },
+
+ talent:{
+  living:78,
+  industry:72,
+  talent:96,
+  transport:76,
+  research:88
+ }
+
+};
+
+document.querySelectorAll(".preset").forEach(btn=>{
+
+ btn.addEventListener("click",()=>{
+
+  document.querySelectorAll(".preset")
+   .forEach(x=>x.classList.remove("active"));
+
+  btn.classList.add("active");
+
+  const p=presets[btn.dataset.preset];
+
+  living.value=p.living;
+  industry.value=p.industry;
+  talent.value=p.talent;
+  transport.value=p.transport;
+  research.value=p.research;
+
+  setValues();
+
+ });
+
+});
+
+function advance(years){
+
+ simYear+=years;
+
+ // stronger visual density over time
+ generateCity();
+
+}
+
+year1.onclick=()=>advance(1);
+year5.onclick=()=>advance(5);
+
+year20.onclick=()=>{
+
+ simYear=2046;
+
+ generateCity();
+
+};
+
+canvas.addEventListener("pointerdown",e=>{
+
+ canvas.setPointerCapture(e.pointerId);
+
+ canvas.dragging=true;
+
+ canvas.lastX=e.clientX;
+ canvas.lastY=e.clientY;
+
+});
+
+canvas.addEventListener("pointermove",e=>{
+
+ if(!canvas.dragging)return;
+
+ const dx=e.clientX-canvas.lastX;
+ const dy=e.clientY-canvas.lastY;
+
+ cityGroup.rotation.y+=dx*.006;
+
+ camera.position.y=Math.max(
+  45,
+  Math.min(150,camera.position.y-dy*.25)
+ );
+
+ camera.lookAt(0,0,0);
+
+ canvas.lastX=e.clientX;
+ canvas.lastY=e.clientY;
+
+});
+
+canvas.addEventListener("pointerup",()=>{
+
+ canvas.dragging=false;
+
+});
+
+canvas.addEventListener("wheel",e=>{
+
+ e.preventDefault();
+
+ const factor=e.deltaY>0?1.08:.92;
+
+ camera.position.multiplyScalar(factor);
+
+ camera.position.y=Math.max(
+  35,
+  Math.min(180,camera.position.y)
+ );
+
+ camera.lookAt(0,0,0);
+
+},{passive:false});
+
+canvas.addEventListener("pointerup",e=>{
+
+ if(Math.abs(e.clientX-canvas.lastX)>8)return;
+
+ const rect=canvas.getBoundingClientRect();
 
  mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
  mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
 
  raycaster.setFromCamera(mouse,camera);
 
- const hits=raycaster.intersectObjects(buildings,true);
+ const hits=raycaster.intersectObjects(
+  clickable,
+  false
+ );
 
  if(!hits.length)return;
 
- let object=hits[0].object;
+ const data=hits[0].object.userData;
 
- while(object.parent && !object.userData.type){
-  object=object.parent;
- }
+ showInfo(data);
 
- if(!object.userData.type)return;
+});
 
- let title=object.userData.title;
+function showInfo(data){
 
- let desc="";
+ const info=document.getElementById("info");
+ const title=document.getElementById("infoTitle");
+ const body=document.getElementById("infoBody");
 
- if(object.userData.type==="public")
- desc="2차 공공기관 이전의 핵심 앵커 시설. 주변 기업과 인재를 끌어들이는 중심 기능.";
-
- if(object.userData.type==="business")
- desc="공공기관의 업무 기능과 연계되는 민간기업. 산업 클러스터의 규모를 결정하는 핵심 요소.";
-
- if(object.userData.type==="research")
- desc="대학·공공기관·기업을 연결하는 연구개발 기능. 산학연 연계 수준에 따라 성장성이 달라짐.";
-
- if(object.userData.type==="university")
- desc="지역인재 공급과 전문인력 양성을 담당하는 대학·교육 기능.";
-
- if(object.userData.type==="housing")
- desc="공공기관 종사자와 지역 주민을 위한 주거 기능. 정주환경 수준에 따라 규모와 밀도가 변화.";
-
- if(object.userData.type==="commerce")
- desc="상업·생활 서비스 시설. 인구와 직장인 수가 증가할수록 활성화됨.";
-
- if(object.userData.type==="station")
- desc=object.userData.description;
-
- document.getElementById("infoTitle").textContent=title;
- document.getElementById("infoText").textContent=desc;
- document.getElementById("info").style.display="block";
-
-}
-
-function setupUI(){
-
- document.querySelectorAll(".preset").forEach(btn=>{
-
-  btn.addEventListener("click",()=>{
-
-   document.querySelectorAll(".preset").forEach(x=>x.classList.remove("active"));
-   btn.classList.add("active");
-
-   let p=btn.dataset.preset;
-
-   if(p==="optimal"){
-    setParams(78,82,70,82,80);
-   }
-
-   if(p==="industry"){
-    setParams(65,95,55,75,92);
-   }
-
-   if(p==="living"){
-    setParams(95,65,60,85,70);
-   }
-
-   if(p==="talent"){
-    setParams(72,72,95,78,90);
-   }
-
-   createCity();
-
-  });
-
- });
-
- document.querySelectorAll(".layout").forEach(btn=>{
-
-  btn.addEventListener("click",()=>{
-
-   document.querySelectorAll(".layout").forEach(x=>x.classList.remove("active"));
-   btn.classList.add("active");
-
-   currentLayout=btn.dataset.layout;
-
-   createCity();
-
-  });
-
- });
-
- const sliders=[
-  ["settlement","settlementVal"],
-  ["industry","industryVal"],
-  ["talent","talentVal"],
-  ["transport","transportVal"],
-  ["research","researchVal"]
- ];
-
- sliders.forEach(([id,val])=>{
-
-  document.getElementById(id).addEventListener("input",e=>{
-
-   params[id]=Number(e.target.value);
-
-   document.getElementById(val).textContent=e.target.value;
-
-   createCity();
-   updateMetrics();
-
-  });
-
- });
-
- document.getElementById("oneYear").onclick=()=>simulate(1);
- document.getElementById("fiveYear").onclick=()=>simulate(5);
- document.getElementById("twentyYear").onclick=()=>simulate(20);
-
- document.getElementById("closeInfo").onclick=()=>{
-  document.getElementById("info").style.display="none";
+ const names={
+  public:"공공기관",
+  firm:"연계 기업",
+  university:"지역 대학",
+  research:"연구기관",
+  housing:"주거단지",
+  commercial:"상업시설",
+  station:"광역교통 거점"
  };
 
-}
+ title.textContent=names[data.type]||"도시 시설";
 
-function setParams(a,b,c,d,e){
+ let text="";
 
- params.settlement=a;
- params.industry=b;
- params.talent=c;
- params.transport=d;
- params.research=e;
+ if(data.type==="public"){
 
- const map=[
-  ["settlement","settlementVal",a],
-  ["industry","industryVal",b],
-  ["talent","talentVal",c],
-  ["transport","transportVal",d],
-  ["research","researchVal",e]
- ];
-
- map.forEach(x=>{
-  document.getElementById(x[0]).value=x[2];
-  document.getElementById(x[1]).textContent=x[2];
- });
-
-}
-
-function simulate(years){
-
- const quality=(
-  params.settlement*.22+
-  params.industry*.23+
-  params.talent*.16+
-  params.transport*.18+
-  params.research*.21
- );
-
- const growth=(quality-45)/100;
-
- for(let i=0;i<years;i++){
-
-  year++;
-
-  population*=1+(growth*.018);
-
-  firms*=1+(growth*.035);
-
-  jobs*=1+(growth*.045);
-
-  vacancy-=growth*.55;
+  text=`
+  <p>공공기관 이전 거점</p>
+  <p>지역 연계 기능 : ${Math.round(values.industry*.85)}%</p>
+  <p>지역인재 활용 : ${Math.round(values.talent*.9)}%</p>
+  <p>산학연 연계 : ${Math.round(values.research*.9)}%</p>
+  `;
 
  }
 
- vacancy=Math.max(5,Math.min(60,vacancy));
+ else if(data.type==="firm"){
 
- updateMetrics();
+  text=`
+  <p>공공기관 기능과 연계되는 기업</p>
+  <p>산업 클러스터 수준 : ${values.industry}%</p>
+  <p>연구기관 접근성 : ${values.research}%</p>
+  <p>교통 접근성 : ${values.transport}%</p>
+  `;
 
- animateGrowth();
+ }
 
-}
+ else if(data.type==="university"){
 
-function updateMetrics(){
+  text=`
+  <p>지역 인재 공급 거점</p>
+  <p>지역인재 정책 : ${values.talent}%</p>
+  <p>기업 연계 가능성 : ${Math.round((values.talent+values.industry)/2)}%</p>
+  `;
 
- document.getElementById("year").textContent=year;
+ }
 
- document.getElementById("population").textContent=
-  Math.round(population).toLocaleString();
+ else if(data.type==="research"){
 
- document.getElementById("firms").textContent=
-  Math.round(firms).toLocaleString();
+  text=`
+  <p>산학연 공동연구 거점</p>
+  <p>연구 연계 수준 : ${values.research}%</p>
+  <p>산업 수요 연계 : ${Math.round((values.research+values.industry)/2)}%</p>
+  `;
 
- document.getElementById("jobs").textContent=
-  Math.round(jobs).toLocaleString();
+ }
 
- document.getElementById("vacancy").textContent=
-  vacancy.toFixed(1)+"%";
+ else if(data.type==="housing"){
 
- const cluster=
-  params.industry*.35+
-  params.research*.25+
-  params.transport*.15+
-  params.talent*.15+
-  params.settlement*.10;
+  text=`
+  <p>공공기관 종사자 및 지역 주민을 위한 주거지</p>
+  <p>정주환경 수준 : ${values.living}%</p>
+  <p>교통 접근성 : ${values.transport}%</p>
+  `;
 
- document.getElementById("cluster").textContent=
-  Math.round(cluster);
+ }
 
-}
+ else if(data.type==="commercial"){
 
-function animateGrowth(){
+  text=`
+  <p>생활·업무 수요를 담당하는 상업지구</p>
+  <p>예상 상권 활성도 : ${Math.round((values.living+values.transport)/2)}%</p>
+  `;
 
- buildings.forEach((b,i)=>{
+ }
 
-  if(b.userData.type==="business"){
+ else if(data.type==="station"){
 
-   b.scale.y*=1.015;
+  text=`
+  <p>광역교통 및 도시 간 연결 거점</p>
+  <p>광역교통망 수준 : ${values.transport}%</p>
+  <p>역세권 개발 가능성 : ${Math.round((values.transport+values.living)/2)}%</p>
+  `;
 
-  }
+ }
 
- });
-
-}
-
-function resize(){
-
- camera.aspect=window.innerWidth/window.innerHeight;
- camera.updateProjectionMatrix();
-
- renderer.setSize(window.innerWidth,window.innerHeight);
-
-}
-
-function updateCamera(){
-
- camera.position.x=
-  Math.sin(rotationY)*Math.cos(rotationX)*distance;
-
- camera.position.y=
-  Math.sin(rotationX)*distance;
-
- camera.position.z=
-  Math.cos(rotationY)*Math.cos(rotationX)*distance;
-
- camera.lookAt(0,0,0);
+ body.innerHTML=text;
+ info.style.display="block";
 
 }
+
+close.onclick=()=>{
+
+ document.getElementById("info").style.display="none";
+
+};
 
 function animate(){
 
  requestAnimationFrame(animate);
 
- updateCamera();
+ cityGroup.rotation.x=-.08;
 
  renderer.render(scene,camera);
 
 }
+
+window.addEventListener("resize",()=>{
+
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+
+ renderer.setSize(innerWidth,innerHeight);
+
+});
+
+generateCity();
+camera.lookAt(0,0,0);
+animate();
 
 </script>
 
