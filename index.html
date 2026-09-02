@@ -6,1210 +6,861 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CITY TWIN">
-
 <title>PUBLIC CITY TWIN</title>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;
+background:#07101c;color:white;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 
-html,body{
- margin:0;
- width:100%;
- height:100%;
- overflow:hidden;
- background:#07101c;
- color:white;
- font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+#app{width:100%;height:100%;position:relative}
+
+#ui{
+position:absolute;z-index:10;left:18px;top:18px;width:390px;
+max-height:calc(100vh - 36px);overflow:auto;
+background:rgba(7,15,27,.94);backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,.12);border-radius:22px;
+padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.4)
 }
 
-#app{
- position:fixed;
- inset:0;
-}
+h1{font-size:25px;margin:0 0 5px;font-weight:800}
+.sub{font-size:13px;color:#8e9db3;margin-bottom:20px}
 
-#city{
- position:absolute;
- inset:0;
-}
+.section{margin-top:18px}
+.label{font-size:13px;color:#94a5bd;margin-bottom:8px}
 
-#panel{
- position:absolute;
- left:18px;
- top:18px;
- width:370px;
- max-height:calc(100vh - 36px);
- overflow:auto;
- padding:22px;
- border-radius:22px;
- background:rgba(7,16,28,.93);
- border:1px solid rgba(255,255,255,.12);
- backdrop-filter:blur(18px);
- box-shadow:0 20px 60px rgba(0,0,0,.4);
- z-index:10;
-}
-
-h1{
- margin:0;
- font-size:25px;
- letter-spacing:-1px;
-}
-
-.subtitle{
- margin-top:5px;
- color:#93a4bb;
- font-size:13px;
-}
-
-.section{
- margin-top:20px;
-}
-
-.section-title{
- color:#91a4bd;
- font-size:12px;
- margin-bottom:9px;
- font-weight:700;
-}
-
-.grid{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:8px;
-}
-
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 button{
- border:0;
- border-radius:12px;
- padding:12px 10px;
- background:#14263d;
- color:white;
- font-weight:700;
- font-size:13px;
+border:0;border-radius:12px;padding:12px 9px;
+background:#152840;color:#e9f0fa;font-weight:700;font-size:13px
 }
+button:active{transform:scale(.97)}
+button.active{background:#367dff;color:white}
+button.wide{grid-column:1/3}
 
-button:active{
- transform:scale(.97);
-}
+.slider{margin:15px 0}
+.sliderHead{display:flex;justify-content:space-between;font-size:13px;font-weight:700}
+.sliderHead span:last-child{color:#62a0ff;font-size:14px}
+input[type=range]{width:100%;accent-color:#3985ff}
 
-button.active{
- background:#347cff;
-}
-
-.slider{
- margin:13px 0;
-}
-
-.slider-top{
- display:flex;
- justify-content:space-between;
- font-size:13px;
- font-weight:700;
-}
-
-.value{
- color:#65a0ff;
-}
-
-input[type=range]{
- width:100%;
- margin-top:7px;
- accent-color:#3985ff;
-}
-
-.time-buttons{
- display:grid;
- grid-template-columns:1fr 1fr 1.4fr;
- gap:7px;
-}
+.time{display:flex;gap:7px}
+.time button{flex:1}
 
 .metrics{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:8px;
- margin-top:12px;
+display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px
 }
-
 .metric{
- padding:12px;
- border-radius:13px;
- background:#111e31;
+background:rgba(255,255,255,.055);border-radius:13px;padding:12px
 }
+.metric small{display:block;color:#7f91aa;font-size:11px}
+.metric b{font-size:21px;margin-top:3px;display:block}
 
-.metric small{
- display:block;
- color:#8192a9;
- font-size:10px;
-}
-
-.metric strong{
- display:block;
- margin-top:4px;
- font-size:19px;
+#hint{
+position:absolute;z-index:5;bottom:18px;left:50%;transform:translateX(-50%);
+background:rgba(5,12,22,.85);padding:11px 18px;border-radius:30px;
+font-size:12px;color:#c7d3e5;white-space:nowrap
 }
 
 #info{
- position:absolute;
- right:22px;
- top:22px;
- width:310px;
- padding:18px;
- border-radius:18px;
- background:rgba(7,16,28,.94);
- border:1px solid rgba(255,255,255,.14);
- backdrop-filter:blur(16px);
- z-index:20;
- display:none;
+display:none;position:absolute;z-index:20;right:22px;top:22px;width:310px;
+padding:20px;border-radius:18px;background:rgba(7,15,27,.95);
+border:1px solid rgba(255,255,255,.15);box-shadow:0 15px 50px #0008
 }
-
-#info h2{
- margin:0 0 7px;
- font-size:18px;
-}
-
-#info p{
- margin:5px 0;
- color:#b9c6d8;
- font-size:12px;
- line-height:1.5;
-}
-
-#close{
- position:absolute;
- right:10px;
- top:10px;
- width:30px;
- height:30px;
- padding:0;
- border-radius:50%;
-}
+#info h2{margin:0 0 8px;font-size:20px}
+#info p{color:#aebbd0;font-size:13px;line-height:1.6;margin:0}
+#close{float:right;background:#25344b;border-radius:50%;padding:5px 9px}
 
 #legend{
- position:absolute;
- right:22px;
- bottom:22px;
- padding:13px 15px;
- border-radius:15px;
- background:rgba(7,16,28,.88);
- font-size:11px;
- color:#b9c6d8;
- z-index:10;
+position:absolute;right:20px;bottom:20px;background:#07101ddd;
+padding:12px 15px;border-radius:14px;font-size:11px;color:#aebbd0
 }
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
 
-.legend-row{
- display:flex;
- align-items:center;
- gap:7px;
- margin:4px 0;
-}
-
-.dot{
- width:9px;
- height:9px;
- border-radius:50%;
-}
-
-#hint{
- position:absolute;
- bottom:20px;
- left:50%;
- transform:translateX(-50%);
- padding:10px 16px;
- border-radius:20px;
- background:rgba(7,16,28,.85);
- color:#b9c6d8;
- font-size:11px;
- z-index:5;
- white-space:nowrap;
-}
-
-@media(max-width:800px){
- #panel{
-  width:340px;
-  left:12px;
-  top:12px;
-  max-height:calc(100vh - 24px);
- }
-
- #info{
-  right:12px;
-  top:12px;
-  width:280px;
- }
-
- #legend{
-  display:none;
- }
+@media(max-width:700px){
+#ui{width:350px;left:10px;top:10px;max-height:65vh;padding:17px}
+#info{right:10px;top:10px;width:270px}
 }
 </style>
 </head>
 
 <body>
-
 <div id="app">
 
-<canvas id="city"></canvas>
-
-<div id="panel">
-
+<div id="ui">
 <h1>🏙️ PUBLIC CITY TWIN</h1>
-<div class="subtitle">2차 공공기관 이전 · 도시 시뮬레이션</div>
+<div class="sub">2차 공공기관 이전 · 도시 시뮬레이션</div>
 
 <div class="section">
-<div class="section-title">도시 모델</div>
-
+<div class="label">도시 모델</div>
 <div class="grid">
-<button class="preset active" data-preset="optimal">통합 최적형</button>
-<button class="preset" data-preset="industry">산업 클러스터</button>
-<button class="preset" data-preset="living">정주환경 중심</button>
-<button class="preset" data-preset="talent">지역인재 중심</button>
+<button class="preset active" data-p="optimal">통합 최적형</button>
+<button class="preset" data-p="industry">산업 클러스터</button>
+<button class="preset" data-p="living">정주환경 중심</button>
+<button class="preset" data-p="talent">지역인재 중심</button>
 </div>
 </div>
 
 <div class="section">
-<div class="section-title">공간 구조</div>
-
+<div class="label">공간 구조</div>
 <div class="grid">
-<button class="layout active" data-layout="compact">집약형</button>
-<button class="layout" data-layout="linear">선형형</button>
-<button class="layout" data-layout="polycentric">다핵형</button>
-<button class="layout" data-layout="mixed">혼합형</button>
+<button class="layout active" data-l="compact">집약형</button>
+<button class="layout" data-l="linear">선형형</button>
+<button class="layout wide" data-l="multi">다핵형</button>
 </div>
 </div>
 
 <div class="section">
-
-<div class="section-title">정책 변수</div>
+<div class="label">정책 변수</div>
 
 <div class="slider">
-<div class="slider-top">
-<span>정주환경</span>
-<span class="value" id="vLiving">80</span>
-</div>
+<div class="sliderHead"><span>정주환경</span><span id="vLiving">80</span></div>
 <input id="living" type="range" min="0" max="100" value="80">
 </div>
 
 <div class="slider">
-<div class="slider-top">
-<span>산업 클러스터</span>
-<span class="value" id="vIndustry">85</span>
-</div>
+<div class="sliderHead"><span>산업 클러스터</span><span id="vIndustry">85</span></div>
 <input id="industry" type="range" min="0" max="100" value="85">
 </div>
 
 <div class="slider">
-<div class="slider-top">
-<span>지역인재</span>
-<span class="value" id="vTalent">70</span>
-</div>
+<div class="sliderHead"><span>지역인재</span><span id="vTalent">70</span></div>
 <input id="talent" type="range" min="0" max="100" value="70">
 </div>
 
 <div class="slider">
-<div class="slider-top">
-<span>광역교통망</span>
-<span class="value" id="vTransport">80</span>
-</div>
+<div class="sliderHead"><span>광역교통망</span><span id="vTransport">80</span></div>
 <input id="transport" type="range" min="0" max="100" value="80">
 </div>
 
 <div class="slider">
-<div class="slider-top">
-<span>산학연 연계</span>
-<span class="value" id="vResearch">75</span>
-</div>
+<div class="sliderHead"><span>산학연 연계</span><span id="vResearch">75</span></div>
 <input id="research" type="range" min="0" max="100" value="75">
 </div>
-
 </div>
 
 <div class="section">
-
-<div class="section-title">시간 이동</div>
-
-<div class="time-buttons">
+<div class="label">시간 이동</div>
+<div class="time">
 <button id="year1">+1년</button>
 <button id="year5">+5년</button>
 <button id="year20" class="active">20년 시뮬레이션</button>
 </div>
-
 </div>
 
 <div class="section">
-
-<div class="section-title">도시 현황</div>
-
-<div style="color:#70a5ff;font-size:12px;margin-bottom:5px">
-현재 시점 : <b id="year">2026</b>년
-</div>
-
+<div class="label">현재 시점 · <span id="year">2026</span>년</div>
 <div class="metrics">
-
-<div class="metric">
-<small>인구</small>
-<strong id="population">40,000</strong>
-</div>
-
-<div class="metric">
-<small>기업</small>
-<strong id="firms">120</strong>
-</div>
-
-<div class="metric">
-<small>일자리</small>
-<strong id="jobs">21,000</strong>
-</div>
-
-<div class="metric">
-<small>상업 활성도</small>
-<strong id="commerce">64%</strong>
-</div>
-
-<div class="metric">
-<small>정주 안정성</small>
-<strong id="settlement">61%</strong>
-</div>
-
-<div class="metric">
-<small>산학연 연계</small>
-<strong id="network">67%</strong>
-</div>
-
+<div class="metric"><small>인구</small><b id="population">40,000</b></div>
+<div class="metric"><small>기업</small><b id="firms">120</b></div>
+<div class="metric"><small>일자리</small><b id="jobs">18,000</b></div>
+<div class="metric"><small>상업 공실률</small><b id="vacancy">38%</b></div>
+<div class="metric"><small>클러스터 지수</small><b id="cluster">72</b></div>
+<div class="metric"><small>정착 안정도</small><b id="settlement">68</b></div>
 </div>
 </div>
-
 </div>
 
 <div id="info">
 <button id="close">×</button>
-<h2 id="infoTitle">건물</h2>
-<div id="infoBody"></div>
+<h2 id="infoTitle">시설</h2>
+<p id="infoText"></p>
 </div>
+
+<div id="hint">☝️ 드래그: 도시 회전 · 두 손가락/휠: 확대·축소 · 건물 터치</div>
 
 <div id="legend">
-
-<div class="legend-row"><span class="dot" style="background:#397cff"></span>공공기관</div>
-<div class="legend-row"><span class="dot" style="background:#e09a4d"></span>기업</div>
-<div class="legend-row"><span class="dot" style="background:#49a98d"></span>대학</div>
-<div class="legend-row"><span class="dot" style="background:#9c67d7"></span>연구소</div>
-<div class="legend-row"><span class="dot" style="background:#687b94"></span>주거</div>
+<span class="dot" style="background:#4b8cff"></span>공공기관　
+<span class="dot" style="background:#e2a34c"></span>기업　
+<span class="dot" style="background:#39b9a0"></span>대학·연구　
+<span class="dot" style="background:#8b94a5"></span>주거
 </div>
 
-<div id="hint">👆 드래그: 도시 회전 · 두 손가락/휠: 확대·축소 · 건물 터치</div>
-
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
+/* =========================
+   CITY TWIN ENGINE
+========================= */
 
-const canvas=document.getElementById("city");
+let scene,camera,renderer,city;
+let buildings=[];
+let roads=[];
+let parks=[];
+let clock=new THREE.Clock();
 
-const renderer=new THREE.WebGLRenderer({
- canvas,
- antialias:true,
- powerPreference:"high-performance"
-});
-
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-
-const scene=new THREE.Scene();
-
-scene.background=new THREE.Color(0x07101c);
-
-const camera=new THREE.PerspectiveCamera(
-45,
-innerWidth/innerHeight,
-0.1,
-1000
-);
-
-camera.position.set(95,95,95);
-
-const ambient=new THREE.HemisphereLight(
-0x9fb7d9,
-0x111827,
-2
-);
-
-scene.add(ambient);
-
-const sun=new THREE.DirectionalLight(
-0xffffff,
-3
-);
-
-sun.position.set(50,100,40);
-sun.castShadow=true;
-
-scene.add(sun);
-
-const cityGroup=new THREE.Group();
-scene.add(cityGroup);
-
-const clickable=[];
-
-let layout="compact";
-let simYear=2026;
-
-let values={
- living:80,
- industry:85,
- talent:70,
- transport:80,
- research:75
+let state={
+year:2026,
+layout:"compact",
+living:80,
+industry:85,
+talent:70,
+transport:80,
+research:75
 };
 
-const raycaster=new THREE.Raycaster();
-const mouse=new THREE.Vector2();
+const $=id=>document.getElementById(id);
 
-function material(color){
+function init(){
 
- return new THREE.MeshStandardMaterial({
-  color,
-  roughness:.72,
-  metalness:.08
- });
+scene=new THREE.Scene();
+scene.background=new THREE.Color(0x07101c);
+scene.fog=new THREE.Fog(0x07101c,180,480);
+
+camera=new THREE.PerspectiveCamera(
+55,window.innerWidth/window.innerHeight,.1,1000
+);
+camera.position.set(145,125,155);
+
+renderer=new THREE.WebGLRenderer({
+antialias:true,
+powerPreference:"high-performance"
+});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+document.getElementById("app").appendChild(renderer.domElement);
+
+city=new THREE.Group();
+scene.add(city);
+
+setupLights();
+buildCity();
+setupControls();
+animate();
+
+window.addEventListener("resize",resize);
+}
+
+function setupLights(){
+
+const hemi=new THREE.HemisphereLight(0xbfd8ff,0x172234,2.2);
+scene.add(hemi);
+
+const sun=new THREE.DirectionalLight(0xffffff,3);
+sun.position.set(100,180,80);
+sun.castShadow=true;
+sun.shadow.mapSize.width=2048;
+sun.shadow.mapSize.height=2048;
+scene.add(sun);
+
+const fill=new THREE.DirectionalLight(0x6c9dff,1);
+fill.position.set(-100,70,-120);
+scene.add(fill);
+}
+
+function mat(color,rough=.7){
+return new THREE.MeshStandardMaterial({
+color,
+roughness:rough,
+metalness:.05
+});
+}
+
+function box(w,h,d,color){
+const m=new THREE.Mesh(
+new THREE.BoxGeometry(w,h,d),
+mat(color)
+);
+m.castShadow=true;
+m.receiveShadow=true;
+return m;
+}
+
+/* 땅 */
+function buildGround(){
+
+const ground=box(420,2,420,0x182437);
+ground.position.y=-1;
+city.add(ground);
 
 }
 
-function box(x,y,z,w,h,d,color,type,data){
+/* 도로 */
+function buildRoad(x,z,w,d){
 
- const geometry=new THREE.BoxGeometry(w,h,d);
+const road=box(w,.5,d,0x303b4d);
+road.position.set(x,.25,z);
+city.add(road);
 
- const mesh=new THREE.Mesh(
-  geometry,
-  material(color)
- );
+roads.push(road);
 
- mesh.position.set(x,h/2,z);
-
- mesh.castShadow=true;
- mesh.receiveShadow=true;
-
- mesh.userData={
-  type,
-  ...data
- };
-
- cityGroup.add(mesh);
- clickable.push(mesh);
-
- return mesh;
-
+/* 중앙선 */
+if(w>d){
+for(let i=-w/2+5;i<w/2;i+=12){
+const line=box(5,.55,.35,0x9ba8b8);
+line.position.set(x+i,.53,z);
+city.add(line);
+}
+}else{
+for(let i=-d/2+5;i<d/2;i+=12){
+const line=box(.35,.55,5,0x9ba8b8);
+line.position.set(x,.53,z+i);
+city.add(line);
+}
+}
 }
 
+/* 공원 */
+function buildPark(x,z,w,d){
+
+const p=box(w,.8,d,0x275b4b);
+p.position.set(x,.4,z);
+p.userData={
+title:"도시 녹지·공원",
+text:"정주환경을 높이고 보행·생활권의 질을 개선하는 도시 녹지 공간입니다."
+};
+p.castShadow=true;
+city.add(p);
+parks.push(p);
+
+const treeCount=Math.max(4,Math.floor((w*d)/100));
+
+for(let i=0;i<treeCount;i++){
+const trunk=box(1,4,1,0x63452c);
+trunk.position.set(
+x+(Math.random()-.5)*(w-4),
+2.5,
+z+(Math.random()-.5)*(d-4)
+);
+city.add(trunk);
+
+const crown=new THREE.Mesh(
+new THREE.SphereGeometry(3.5,12,10),
+mat(0x26734d)
+);
+crown.position.set(trunk.position.x,6,trunk.position.z);
+crown.castShadow=true;
+city.add(crown);
+}
+}
+
+/* 건물 */
+function building(x,z,w,h,d,type,name){
+
+let color;
+
+if(type==="public")color=0x397cff;
+if(type==="company")color=0xd69a43;
+if(type==="research")color=0x39b5a0;
+if(type==="housing")color=0x68758a;
+if(type==="commercial")color=0x9a6bb5;
+if(type==="station")color=0xe6e9ef;
+
+const b=box(w,h,d,color);
+b.position.set(x,h/2,z);
+
+b.userData={type,title:name,text:description(type)};
+
+city.add(b);
+buildings.push(b);
+
+/* 창문 */
+if(type!=="station"){
+
+const windowMat=mat(0xbad7ff,.25);
+
+const cols=Math.max(2,Math.floor(w/3));
+const rows=Math.max(2,Math.floor(h/4));
+
+for(let ix=0;ix<cols;ix++){
+for(let iy=0;iy<rows;iy++){
+
+const win=box(.55,.75,.12,0xc8e5ff);
+
+win.position.set(
+x-w/2+2+ix*(w-4)/Math.max(1,cols-1),
+h/2+iy*3-h/2+3,
+z-d/2-.08
+);
+
+city.add(win);
+
+const win2=win.clone();
+win2.position.z=z+d/2+.08;
+city.add(win2);
+}
+}
+}
+
+return b;
+}
+
+function description(type){
+
+const data={
+public:"이전된 공공기관의 핵심 거점입니다. 관련 기업과 연구기관을 주변으로 끌어들이는 앵커 시설로 작동합니다.",
+company:"공공기관의 기능과 연계된 민간기업입니다. 산업 클러스터 수준이 높을수록 주변에 더 많이 집적됩니다.",
+research:"지역 대학·연구기관입니다. 공공기관 및 기업과의 산학연 협력을 통해 지역 인재와 기술을 공급합니다.",
+housing:"공공기관 종사자와 지역 주민을 위한 주거지역입니다. 정주환경 수준에 따라 규모와 밀도가 달라집니다.",
+commercial:"상업시설입니다. 인구와 유동인구가 충분할수록 공실이 감소하고 상권이 활성화됩니다.",
+station:"광역교통 거점입니다. 공공기관·기업·대학을 연결해 도시 전체의 접근성을 높입니다."
+};
+return data[type];
+}
+
+/* 도시 초기화 */
 function clearCity(){
 
- while(cityGroup.children.length){
+while(city.children.length){
+city.remove(city.children[0]);
+}
 
-  const obj=cityGroup.children.pop();
+buildings=[];
+roads=[];
+parks=[];
+}
 
-  obj.geometry?.dispose();
-  obj.material?.dispose();
+/* 도시 생성 */
+function buildCity(){
 
- }
+clearCity();
+buildGround();
 
- clickable.length=0;
+const L=state.layout;
+
+let roadGap=42;
+
+if(L==="linear")roadGap=48;
+if(L==="multi")roadGap=58;
+
+/* 기본 도로망 */
+for(let x=-126;x<=126;x+=roadGap)
+buildRoad(x,0,5,300);
+
+for(let z=-126;z<=126;z+=roadGap)
+buildRoad(0,z,300,5);
+
+/* 광역 교통축 */
+if(state.transport>55){
+buildRoad(0,0,11,330);
+buildRoad(0,0,330,11);
+}
+
+/* 역 */
+building(
+0,-105,25,14,18,"station","광역교통 환승센터"
+);
+
+/* 공공기관 핵심지 */
+const publicPositions=[
+[-22,-22],[22,-22],[-22,22],[22,22],
+[-5,-48],[48,-5]
+];
+
+publicPositions.forEach((p,i)=>{
+building(
+p[0],p[1],
+13,25+state.industry*.12,13,
+"public","공공기관 "+(i+1)
+);
+});
+
+/* 대학·연구 */
+building(-55,35,20,18+state.research*.08,18,
+"research","지역대학");
+
+building(55,35,18,23+state.research*.1,18,
+"research","산학연 연구센터");
+
+/* 공원 */
+buildPark(-55,-55,38,32);
+buildPark(55,-55,38,32);
+buildPark(0,65,45,25);
+
+/* 주거 + 기업 배치 */
+const count=Math.floor(45+state.industry*.45);
+
+for(let i=0;i<count;i++){
+
+let x,z;
+
+if(L==="compact"){
+x=(Math.random()-.5)*190;
+z=(Math.random()-.5)*190;
+}
+
+if(L==="linear"){
+x=(Math.random()-.5)*260;
+z=(Math.random()-.5)*75;
+}
+
+if(L==="multi"){
+const centers=[
+[-80,-70],[80,-70],[-80,70],[80,70]
+];
+const c=centers[i%4];
+x=c[0]+(Math.random()-.5)*65;
+z=c[1]+(Math.random()-.5)*65;
+}
+
+const r=Math.random();
+
+if(r<state.industry/140){
+
+const h=12+Math.random()*(
+15+state.industry*.35
+);
+
+building(
+x,z,
+7+Math.random()*5,h,7+Math.random()*5,
+"company","연계기업"
+);
+
+}else{
+
+const h=10+Math.random()*(
+10+state.living*.25
+);
+
+building(
+x,z,
+8+Math.random()*6,h,8+Math.random()*6,
+"housing","주거단지"
+);
+}
+}
 
 }
 
-function road(x,z,w,d){
+/* =========================
+   정책 프리셋
+========================= */
 
- const g=new THREE.BoxGeometry(w,.35,d);
+document.querySelectorAll(".preset").forEach(btn=>{
+btn.onclick=()=>{
 
- const m=new THREE.Mesh(
-  g,
-  material(0x273447)
- );
+document.querySelectorAll(".preset")
+.forEach(x=>x.classList.remove("active"));
 
- m.position.set(x,.15,z);
+btn.classList.add("active");
 
- cityGroup.add(m);
+const p=btn.dataset.p;
+
+if(p==="optimal"){
+setValues(82,88,75,85,82);
+}
+if(p==="industry"){
+setValues(65,98,60,80,90);
+}
+if(p==="living"){
+setValues(98,65,65,78,70);
+}
+if(p==="talent"){
+setValues(72,78,98,82,95);
+}
+
+buildCity();
+updateMetrics();
+};
+});
+
+function setValues(l,i,t,tr,r){
+
+state.living=l;
+state.industry=i;
+state.talent=t;
+state.transport=tr;
+state.research=r;
+
+$("living").value=l;
+$("industry").value=i;
+$("talent").value=t;
+$("transport").value=tr;
+$("research").value=r;
+
+updateLabels();
+}
+
+/* 공간 구조 */
+document.querySelectorAll(".layout").forEach(btn=>{
+btn.onclick=()=>{
+
+document.querySelectorAll(".layout")
+.forEach(x=>x.classList.remove("active"));
+
+btn.classList.add("active");
+
+state.layout=btn.dataset.l;
+buildCity();
+};
+});
+
+/* 슬라이더 */
+[
+["living","living"],
+["industry","industry"],
+["talent","talent"],
+["transport","transport"],
+["research","research"]
+].forEach(([id,key])=>{
+
+$(id).oninput=e=>{
+state[key]=+e.target.value;
+updateLabels();
+buildCity();
+updateMetrics();
+};
+});
+
+function updateLabels(){
+
+$("vLiving").textContent=state.living;
+$("vIndustry").textContent=state.industry;
+$("vTalent").textContent=state.talent;
+$("vTransport").textContent=state.transport;
+$("vResearch").textContent=state.research;
+}
+
+/* =========================
+   시뮬레이션
+========================= */
+
+function simulate(years){
+
+for(let i=0;i<years;i++){
+
+state.year++;
+
+const cluster=
+state.industry*.32+
+state.research*.25+
+state.transport*.18+
+state.talent*.15+
+state.living*.10;
+
+populationValue+=
+900+
+state.living*9+
+state.talent*5+
+cluster*3;
+
+firmValue+=
+2+
+state.industry*.055+
+state.research*.035;
 
 }
 
-function tree(x,z){
-
- const trunk=box(
-  x,0,z,
-  .7,3,.7,
-  0x594633,
-  "tree",
-  {}
- );
-
- const crown=new THREE.Mesh(
-  new THREE.SphereGeometry(2.2,10,10),
-  material(0x176b4d)
- );
-
- crown.position.set(x,4,z);
- crown.castShadow=true;
-
- cityGroup.add(crown);
+buildCity();
+updateMetrics();
 
 }
 
-function park(x,z,size=10){
-
- const g=new THREE.BoxGeometry(size,.3,size);
-
- const m=new THREE.Mesh(
-  g,
-  material(0x173f35)
- );
-
- m.position.set(x,.15,z);
-
- cityGroup.add(m);
-
- for(let i=0;i<4;i++){
-
-  tree(
-   x+(Math.random()-.5)*size*.7,
-   z+(Math.random()-.5)*size*.7
-  );
-
- }
-
-}
-
-function createBuilding(type,x,z,scale=1){
-
- let color;
- let baseH;
- let width;
-
- if(type==="public"){
-  color=0x397cff;
-  baseH=18;
-  width=7;
- }
-
- if(type==="firm"){
-  color=0xe09a4d;
-  baseH=12;
-  width=6;
- }
-
- if(type==="university"){
-  color=0x49a98d;
-  baseH=10;
-  width=10;
- }
-
- if(type==="research"){
-  color=0x9c67d7;
-  baseH=15;
-  width=7;
- }
-
- if(type==="housing"){
-  color=0x687b94;
-  baseH=16;
-  width=6;
- }
-
- if(type==="commercial"){
-  color=0xc66c75;
-  baseH=8;
-  width=7;
- }
-
- const height=baseH*scale;
-
- return box(
-  x,0,z,
-  width,height,width,
-  color,
-  type,
-  {}
- );
-
-}
-
-function generateCity(){
-
- clearCity();
-
- // ground
- const ground=new THREE.Mesh(
-  new THREE.BoxGeometry(180,.5,180),
-  material(0x303a4b)
- );
-
- ground.position.y=-.25;
- ground.receiveShadow=true;
- cityGroup.add(ground);
-
- // main roads
- road(0,0,180,5);
- road(0,0,5,180);
-
- road(-45,0,180,2.5);
- road(45,0,180,2.5);
-
- road(0,-45,2.5,180);
- road(0,45,2.5,180);
-
- // station
- const station=box(
-  0,0,-48,
-  18,5,8,
-  0xdce6f2,
-  "station",
-  {}
- );
-
- // parks
- park(-28,-28,18);
- park(28,28,18);
- park(-55,55,14);
-
- let publicCount=0;
- let firmCount=0;
-
- const density=.55+(values.industry/100)*.5;
- const livingDensity=.45+(values.living/100)*.65;
-
- // central public institutions
- const publics=[
-  [-18,-10],
-  [0,-10],
-  [18,-10],
-  [-18,10],
-  [18,10]
- ];
-
- publics.forEach((p,i)=>{
-
-  createBuilding(
-   "public",
-   p[0],
-   p[1],
-   1+values.industry/150
-  );
-
-  publicCount++;
-
- });
-
- // university + research
- createBuilding(
-  "university",
-  -25,-27,
-  1+values.talent/180
- );
-
- createBuilding(
-  "research",
-  25,-27,
-  1+values.research/180
- );
-
- // layout-dependent businesses
- for(let i=0;i<26;i++){
-
-  let x,z;
-
-  if(layout==="compact"){
-
-   x=(Math.random()-.5)*75;
-   z=(Math.random()-.5)*55;
-
-  }
-
-  else if(layout==="linear"){
-
-   x=(Math.random()-.5)*150;
-   z=(Math.random()-.5)*18;
-
-  }
-
-  else if(layout==="polycentric"){
-
-   const centers=[
-    [-40,-35],
-    [40,-35],
-    [-40,35],
-    [40,35]
-   ];
-
-   const c=centers[i%4];
-
-   x=c[0]+(Math.random()-.5)*25;
-   z=c[1]+(Math.random()-.5)*25;
-
-  }
-
-  else{
-
-   x=(Math.random()-.5)*110;
-   z=(Math.random()-.5)*75;
-
-  }
-
-  const industrial=values.industry/100;
-
-  if(Math.random()<industrial){
-
-   createBuilding(
-    "firm",
-    x,z,
-    .7+Math.random()*.9
-   );
-
-   firmCount++;
-
-  }else{
-
-   createBuilding(
-    "commercial",
-    x,z,
-    .6+Math.random()*.7
-   );
-
-  }
-
- }
-
- // housing
- const housingN=Math.floor(18+values.living*.22);
-
- for(let i=0;i<housingN;i++){
-
-  let x=(Math.random()-.5)*140;
-  let z=(Math.random()-.5)*110;
-
-  createBuilding(
-   "housing",
-   x,z,
-   .6+livingDensity*.8
-  );
-
- }
-
- // extra trees
- for(let i=0;i<55;i++){
-
-  tree(
-   (Math.random()-.5)*160,
-   (Math.random()-.5)*150
-  );
-
- }
-
- updateMetrics();
-
-}
+let populationValue=40000;
+let firmValue=120;
+
+$("year1").onclick=()=>simulate(1);
+$("year5").onclick=()=>simulate(5);
+$("year20").onclick=()=>simulate(20);
 
 function updateMetrics(){
 
- const policy=
- (
-  values.living+
-  values.industry+
-  values.talent+
-  values.transport+
-  values.research
- )/5;
+const cluster=Math.round(
+state.industry*.30+
+state.research*.25+
+state.transport*.20+
+state.talent*.15+
+state.living*.10
+);
 
- const growth=(simYear-2026);
+const settlement=Math.round(
+state.living*.4+
+state.transport*.2+
+state.talent*.2+
+state.research*.2
+);
 
- const population=Math.round(
-  40000+
-  growth*(170+policy*3)
- );
+const jobs=Math.round(
+firmValue*150+
+state.industry*70
+);
 
- const firms=Math.round(
-  120+
-  growth*(1.5+values.industry*.035+values.research*.015)
- );
+const vacancy=Math.max(
+5,
+Math.round(
+45-
+state.living*.15-
+state.transport*.10-
+cluster*.12
+)
+);
 
- const jobs=Math.round(
-  21000+
-  growth*(220+values.industry*4+values.research*2)
- );
+$("year").textContent=state.year;
+$("population").textContent=
+Math.round(populationValue).toLocaleString();
 
- const commerce=Math.min(
-  99,
-  Math.round(
-   25+
-   values.living*.25+
-   values.industry*.18+
-   values.transport*.2+
-   growth*.7
-  )
- );
+$("firms").textContent=
+Math.round(firmValue).toLocaleString();
 
- const settlement=Math.min(
-  99,
-  Math.round(
-   values.living*.45+
-   values.transport*.2+
-   values.talent*.15+
-   growth*.45
-  )
- );
+$("jobs").textContent=
+jobs.toLocaleString();
 
- const network=Math.min(
-  99,
-  Math.round(
-   values.research*.45+
-   values.talent*.2+
-   values.industry*.2+
-   values.transport*.1+
-   growth*.4
-  )
- );
-
- document.getElementById("year").textContent=simYear;
- document.getElementById("population").textContent=population.toLocaleString();
- document.getElementById("firms").textContent=firms.toLocaleString();
- document.getElementById("jobs").textContent=jobs.toLocaleString();
- document.getElementById("commerce").textContent=commerce+"%";
- document.getElementById("settlement").textContent=settlement+"%";
- document.getElementById("network").textContent=network+"%";
-
+$("vacancy").textContent=vacancy+"%";
+$("cluster").textContent=cluster;
+$("settlement").textContent=settlement;
 }
 
-function setValues(){
+/* =========================
+   건물 터치
+========================= */
 
- values.living=+living.value;
- values.industry=+industry.value;
- values.talent=+talent.value;
- values.transport=+transport.value;
- values.research=+research.value;
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
 
- vLiving.textContent=values.living;
- vIndustry.textContent=values.industry;
- vTalent.textContent=values.talent;
- vTransport.textContent=values.transport;
- vResearch.textContent=values.research;
+function selectBuilding(x,y){
 
- generateCity();
+const rect=renderer.domElement.getBoundingClientRect();
 
+pointer.x=((x-rect.left)/rect.width)*2-1;
+pointer.y=-((y-rect.top)/rect.height)*2+1;
+
+raycaster.setFromCamera(pointer,camera);
+
+const hit=raycaster.intersectObjects(buildings,true);
+
+if(hit.length){
+
+let obj=hit[0].object;
+
+while(obj && !obj.userData.title)
+obj=obj.parent;
+
+if(obj){
+
+$("infoTitle").textContent=obj.userData.title;
+$("infoText").textContent=obj.userData.text;
+$("info").style.display="block";
+}
+}
 }
 
-[
- ["living","vLiving"],
- ["industry","vIndustry"],
- ["talent","vTalent"],
- ["transport","vTransport"],
- ["research","vResearch"]
-].forEach(([id,val])=>{
-
- document.getElementById(id).addEventListener(
-  "input",
-  setValues
- );
-
-});
-
-document.querySelectorAll(".layout").forEach(btn=>{
-
- btn.addEventListener("click",()=>{
-
-  document.querySelectorAll(".layout")
-   .forEach(x=>x.classList.remove("active"));
-
-  btn.classList.add("active");
-
-  layout=btn.dataset.layout;
-
-  generateCity();
-
- });
-
-});
-
-const presets={
-
- optimal:{
-  living:82,
-  industry:88,
-  talent:75,
-  transport:85,
-  research:82
- },
-
- industry:{
-  living:62,
-  industry:95,
-  talent:65,
-  transport:78,
-  research:90
- },
-
- living:{
-  living:96,
-  industry:62,
-  talent:70,
-  transport:80,
-  research:65
- },
-
- talent:{
-  living:78,
-  industry:72,
-  talent:96,
-  transport:76,
-  research:88
- }
-
+$("close").onclick=()=>{
+$("info").style.display="none";
 };
 
-document.querySelectorAll(".preset").forEach(btn=>{
+/* =========================
+   카메라 조작
+========================= */
 
- btn.addEventListener("click",()=>{
+let dragging=false;
+let lastX=0,lastY=0;
+let rotY=.65;
+let rotX=.55;
+let distance=210;
 
-  document.querySelectorAll(".preset")
-   .forEach(x=>x.classList.remove("active"));
+function updateCamera(){
 
-  btn.classList.add("active");
+const target=new THREE.Vector3(0,25,0);
 
-  const p=presets[btn.dataset.preset];
+camera.position.x=
+target.x+Math.sin(rotY)*Math.cos(rotX)*distance;
 
-  living.value=p.living;
-  industry.value=p.industry;
-  talent.value=p.talent;
-  transport.value=p.transport;
-  research.value=p.research;
+camera.position.y=
+target.y+Math.sin(rotX)*distance;
 
-  setValues();
+camera.position.z=
+target.z+Math.cos(rotY)*Math.cos(rotX)*distance;
 
- });
-
-});
-
-function advance(years){
-
- simYear+=years;
-
- // stronger visual density over time
- generateCity();
-
+camera.lookAt(target);
 }
 
-year1.onclick=()=>advance(1);
-year5.onclick=()=>advance(5);
-
-year20.onclick=()=>{
-
- simYear=2046;
-
- generateCity();
-
-};
-
-canvas.addEventListener("pointerdown",e=>{
-
- canvas.setPointerCapture(e.pointerId);
-
- canvas.dragging=true;
-
- canvas.lastX=e.clientX;
- canvas.lastY=e.clientY;
-
+renderer.domElement.addEventListener("pointerdown",e=>{
+dragging=true;
+lastX=e.clientX;
+lastY=e.clientY;
 });
 
-canvas.addEventListener("pointermove",e=>{
+renderer.domElement.addEventListener("pointermove",e=>{
 
- if(!canvas.dragging)return;
+if(!dragging)return;
 
- const dx=e.clientX-canvas.lastX;
- const dy=e.clientY-canvas.lastY;
+const dx=e.clientX-lastX;
+const dy=e.clientY-lastY;
 
- cityGroup.rotation.y+=dx*.006;
+rotY-=dx*.006;
+rotX+=dy*.004;
 
- camera.position.y=Math.max(
-  45,
-  Math.min(150,camera.position.y-dy*.25)
- );
+rotX=Math.max(.2,Math.min(1.25,rotX));
 
- camera.lookAt(0,0,0);
+lastX=e.clientX;
+lastY=e.clientY;
 
- canvas.lastX=e.clientX;
- canvas.lastY=e.clientY;
-
+updateCamera();
 });
 
-canvas.addEventListener("pointerup",()=>{
-
- canvas.dragging=false;
-
+renderer.domElement.addEventListener("pointerup",e=>{
+dragging=false;
+selectBuilding(e.clientX,e.clientY);
 });
 
-canvas.addEventListener("wheel",e=>{
-
- e.preventDefault();
-
- const factor=e.deltaY>0?1.08:.92;
-
- camera.position.multiplyScalar(factor);
-
- camera.position.y=Math.max(
-  35,
-  Math.min(180,camera.position.y)
- );
-
- camera.lookAt(0,0,0);
-
-},{passive:false});
-
-canvas.addEventListener("pointerup",e=>{
-
- if(Math.abs(e.clientX-canvas.lastX)>8)return;
-
- const rect=canvas.getBoundingClientRect();
-
- mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
- mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
-
- raycaster.setFromCamera(mouse,camera);
-
- const hits=raycaster.intersectObjects(
-  clickable,
-  false
- );
-
- if(!hits.length)return;
-
- const data=hits[0].object.userData;
-
- showInfo(data);
-
+renderer.domElement.addEventListener("pointercancel",()=>{
+dragging=false;
 });
 
-function showInfo(data){
+renderer.domElement.addEventListener("wheel",e=>{
+distance+=e.deltaY*.12;
+distance=Math.max(80,Math.min(350,distance));
+updateCamera();
+},{passive:true});
 
- const info=document.getElementById("info");
- const title=document.getElementById("infoTitle");
- const body=document.getElementById("infoBody");
+/* 핀치 줌 */
+let pinchStart=null;
 
- const names={
-  public:"공공기관",
-  firm:"연계 기업",
-  university:"지역 대학",
-  research:"연구기관",
-  housing:"주거단지",
-  commercial:"상업시설",
-  station:"광역교통 거점"
- };
-
- title.textContent=names[data.type]||"도시 시설";
-
- let text="";
-
- if(data.type==="public"){
-
-  text=`
-  <p>공공기관 이전 거점</p>
-  <p>지역 연계 기능 : ${Math.round(values.industry*.85)}%</p>
-  <p>지역인재 활용 : ${Math.round(values.talent*.9)}%</p>
-  <p>산학연 연계 : ${Math.round(values.research*.9)}%</p>
-  `;
-
- }
-
- else if(data.type==="firm"){
-
-  text=`
-  <p>공공기관 기능과 연계되는 기업</p>
-  <p>산업 클러스터 수준 : ${values.industry}%</p>
-  <p>연구기관 접근성 : ${values.research}%</p>
-  <p>교통 접근성 : ${values.transport}%</p>
-  `;
-
- }
-
- else if(data.type==="university"){
-
-  text=`
-  <p>지역 인재 공급 거점</p>
-  <p>지역인재 정책 : ${values.talent}%</p>
-  <p>기업 연계 가능성 : ${Math.round((values.talent+values.industry)/2)}%</p>
-  `;
-
- }
-
- else if(data.type==="research"){
-
-  text=`
-  <p>산학연 공동연구 거점</p>
-  <p>연구 연계 수준 : ${values.research}%</p>
-  <p>산업 수요 연계 : ${Math.round((values.research+values.industry)/2)}%</p>
-  `;
-
- }
-
- else if(data.type==="housing"){
-
-  text=`
-  <p>공공기관 종사자 및 지역 주민을 위한 주거지</p>
-  <p>정주환경 수준 : ${values.living}%</p>
-  <p>교통 접근성 : ${values.transport}%</p>
-  `;
-
- }
-
- else if(data.type==="commercial"){
-
-  text=`
-  <p>생활·업무 수요를 담당하는 상업지구</p>
-  <p>예상 상권 활성도 : ${Math.round((values.living+values.transport)/2)}%</p>
-  `;
-
- }
-
- else if(data.type==="station"){
-
-  text=`
-  <p>광역교통 및 도시 간 연결 거점</p>
-  <p>광역교통망 수준 : ${values.transport}%</p>
-  <p>역세권 개발 가능성 : ${Math.round((values.transport+values.living)/2)}%</p>
-  `;
-
- }
-
- body.innerHTML=text;
- info.style.display="block";
-
+renderer.domElement.addEventListener("touchstart",e=>{
+if(e.touches.length===2){
+pinchStart=Math.hypot(
+e.touches[0].clientX-e.touches[1].clientX,
+e.touches[0].clientY-e.touches[1].clientY
+);
 }
+},{passive:true});
 
-close.onclick=()=>{
+renderer.domElement.addEventListener("touchmove",e=>{
+if(e.touches.length===2 && pinchStart){
 
- document.getElementById("info").style.display="none";
+const now=Math.hypot(
+e.touches[0].clientX-e.touches[1].clientX,
+e.touches[0].clientY-e.touches[1].clientY
+);
 
-};
+distance-=((now-pinchStart)*.3);
+distance=Math.max(80,Math.min(350,distance));
+pinchStart=now;
+
+updateCamera();
+}
+},{passive:true});
+
+/* =========================
+   렌더링
+========================= */
 
 function animate(){
 
- requestAnimationFrame(animate);
+requestAnimationFrame(animate);
 
- cityGroup.rotation.x=-.08;
+const t=clock.getElapsedTime();
 
- renderer.render(scene,camera);
+city.position.y=Math.sin(t*.25)*.08;
 
+renderer.render(scene,camera);
 }
 
-window.addEventListener("resize",()=>{
+function resize(){
 
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
+camera.aspect=window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth,window.innerHeight);
+}
 
- renderer.setSize(innerWidth,innerHeight);
-
-});
-
-generateCity();
-camera.lookAt(0,0,0);
-animate();
-
+init();
+updateCamera();
+updateLabels();
+updateMetrics();
 </script>
-
 </body>
 </html>
